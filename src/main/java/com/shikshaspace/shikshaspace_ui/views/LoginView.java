@@ -195,21 +195,26 @@ public class LoginView extends VerticalLayout {
     private void handleLoginSuccess(AuthResponse response) {
         log.info("Login successful for user: {}", response.getUsername());
 
-        // Store tokens in session (both access and refresh)
-        VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
-        VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
-        VaadinSession.getCurrent().setAttribute("username", response.getUsername());
-        VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> {
+                // Store tokens in session
+                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
+                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
+                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
 
+                // Show success notification
+                Notification.show("Welcome back, " + response.getUsername() + "!",
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-        // Show success notification
-        Notification.show("Welcome back, " + response.getUsername() + "!", 
-                3000, Notification.Position.TOP_CENTER)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
-        // Redirect to home page
-        UI.getCurrent().navigate("");
+                // Redirect to home page
+                UI.getCurrent().navigate("");
+            });
+        }
     }
+
 
     /**
      * Handle login error
@@ -217,40 +222,46 @@ public class LoginView extends VerticalLayout {
     private void handleLoginError(Throwable error) {
         log.error("Login failed", error);
 
-        // Re-enable button
-        loginButton.setEnabled(true);
-        loginButton.setText("Login");
-        loginButton.getElement().setProperty("loading", false);
+        // CRITICAL: Must use UI.access() when called from reactive thread
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> {
+                // Re-enable button
+                loginButton.setEnabled(true);
+                loginButton.setText("Login");
+                loginButton.getElement().setProperty("loading", false);
 
-        // Show detailed error message
-        String errorMsg = "Login failed. Please try again.";
+                // Show detailed error message
+                String errorMsg = "Login failed. Please try again.";
 
-        if (error.getMessage() != null) {
-            if (error.getMessage().contains("401")) {
-                // User doesn't exist in Keycloak
-                errorMsg = "Account not found. Please register first or contact admin.";
+                if (error.getMessage() != null) {
+                    if (error.getMessage().contains("401")) {
+                        errorMsg = "Account not found. Please register first or contact admin.";
 
-                // Show register link notification
-                Notification notification = Notification.show(
-                        "Don't have an account? Click Register to create one.",
-                        5000,
-                        Notification.Position.TOP_CENTER
-                );
-                notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+                        // Show register link notification
+                        Notification notification = Notification.show(
+                                "Don't have an account? Click Register to create one.",
+                                5000,
+                                Notification.Position.TOP_CENTER
+                        );
+                        notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
 
-            } else if (error.getMessage().contains("timeout")) {
-                errorMsg = "Connection timeout. Please check your internet and try again.";
-            } else if (error.getMessage().contains("400")) {
-                errorMsg = "Invalid request. Please check your credentials.";
-            } else {
-                errorMsg = "Login failed. Please check your connection.";
-            }
+                    } else if (error.getMessage().contains("timeout")) {
+                        errorMsg = "Connection timeout. Please check your internet and try again.";
+                    } else if (error.getMessage().contains("400")) {
+                        errorMsg = "Invalid request. Please check your credentials.";
+                    } else {
+                        errorMsg = "Login failed. Please check your connection.";
+                    }
+                }
+
+                showError(errorMsg);
+                passwordField.clear();
+                passwordField.focus();
+            });
         }
-
-        showError(errorMsg);
-        passwordField.clear();
-        passwordField.focus();
     }
+
 
 
     /**

@@ -329,45 +329,56 @@ public class RegisterView extends VerticalLayout {
     private void handleRegisterSuccess(AuthResponse response) {
         log.info("Registration successful for user: {}", response.getUsername());
 
-        // Store tokens in session (auto-login with refresh token)
-        VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
-        VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
-        VaadinSession.getCurrent().setAttribute("username", response.getUsername());
-        VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> {
+                // Store tokens (auto-login)
+                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
+                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
+                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
 
+                // Show success
+                Notification.show("Account created! Welcome, " + response.getUsername() + "!",
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-        // Show success notification
-        Notification.show("Account created successfully! Welcome " + response.getUsername() + "!", 
-                3000, Notification.Position.TOP_CENTER)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
-        // Redirect to home page
-        UI.getCurrent().navigate("");
+                // Redirect to home
+                UI.getCurrent().navigate("");
+            });
+        }
     }
+
 
     /**
      * Handle registration error
      */
     private void handleRegisterError(Throwable error) {
         log.error("Registration failed", error);
-        
-        // Re-enable button
-        registerButton.setEnabled(true);
-        registerButton.setText("Create Account");
-        registerButton.getElement().setProperty("loading", false);
 
-        // Show error message
-        String errorMsg = "Registration failed. Please try again.";
-        if (error.getMessage() != null && error.getMessage().contains("409")) {
-            errorMsg = "Username or email already exists";
-        } else if (error.getMessage() != null && error.getMessage().contains("400")) {
-            errorMsg = "Invalid input. Please check your details.";
-        } else if (error.getMessage() != null && error.getMessage().contains("timeout")) {
-            errorMsg = "Connection timeout. Please try again.";
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> {
+                // Re-enable button
+                registerButton.setEnabled(true);
+                registerButton.setText("Create Account");
+                registerButton.getElement().setProperty("loading", false);
+
+                // Show error message
+                String errorMsg = "Registration failed. Please try again.";
+                if (error.getMessage() != null && error.getMessage().contains("409")) {
+                    errorMsg = "Username or email already exists";
+                } else if (error.getMessage() != null && error.getMessage().contains("400")) {
+                    errorMsg = "Invalid input. Please check your details.";
+                } else if (error.getMessage() != null && error.getMessage().contains("timeout")) {
+                    errorMsg = "Connection timeout. Please try again.";
+                }
+
+                showError(errorMsg);
+            });
         }
-        
-        showError(errorMsg);
     }
+
 
     /**
      * Show error message
