@@ -112,18 +112,30 @@ public class LoginView extends VerticalLayout {
             }
         });
 
-        // Register link
+        // Register link - More prominent
+        Div registerContainer = new Div();
+        registerContainer.getStyle()
+                .set("text-align", "center")
+                .set("margin-top", "20px")
+                .set("padding", "15px")
+                .set("background", "#f5f7ff")
+                .set("border-radius", "8px")
+                .set("border", "1px solid #667eea");
+
         Paragraph registerText = new Paragraph();
-        registerText.getStyle().set("text-align", "center").set("margin-top", "20px");
+        registerText.getStyle().set("margin", "0").set("color", "#333");
         registerText.setText("Don't have an account? ");
-        
+
         RouterLink registerLink = new RouterLink("Register now", RegisterView.class);
         registerLink.getStyle()
                 .set("color", "#667eea")
-                .set("font-weight", "500")
-                .set("text-decoration", "none");
-        
+                .set("font-weight", "600")
+                .set("text-decoration", "none")
+                .set("font-size", "16px");
+
         registerText.add(registerLink);
+        registerContainer.add(registerText);
+
 
         // Assemble login card
         loginCard.add(
@@ -133,8 +145,9 @@ public class LoginView extends VerticalLayout {
                 usernameField,
                 passwordField,
                 loginButton,
-                registerText
+                registerContainer  // Changed from registerText
         );
+
 
         add(loginCard);
     }
@@ -203,25 +216,42 @@ public class LoginView extends VerticalLayout {
      */
     private void handleLoginError(Throwable error) {
         log.error("Login failed", error);
-        
+
         // Re-enable button
         loginButton.setEnabled(true);
         loginButton.setText("Login");
+        loginButton.getElement().setProperty("loading", false);
 
-        // Show error message
-        String errorMsg = "Invalid username or password";
-        if (error.getMessage() != null && error.getMessage().contains("401")) {
-            errorMsg = "Invalid credentials. Please try again.";
-        } else if (error.getMessage() != null && error.getMessage().contains("timeout")) {
-            errorMsg = "Connection timeout. Please try again.";
-        } else if (error.getMessage() != null) {
-            errorMsg = "Login failed. Please check your connection.";
+        // Show detailed error message
+        String errorMsg = "Login failed. Please try again.";
+
+        if (error.getMessage() != null) {
+            if (error.getMessage().contains("401")) {
+                // User doesn't exist in Keycloak
+                errorMsg = "Account not found. Please register first or contact admin.";
+
+                // Show register link notification
+                Notification notification = Notification.show(
+                        "Don't have an account? Click Register to create one.",
+                        5000,
+                        Notification.Position.TOP_CENTER
+                );
+                notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+
+            } else if (error.getMessage().contains("timeout")) {
+                errorMsg = "Connection timeout. Please check your internet and try again.";
+            } else if (error.getMessage().contains("400")) {
+                errorMsg = "Invalid request. Please check your credentials.";
+            } else {
+                errorMsg = "Login failed. Please check your connection.";
+            }
         }
-        
+
         showError(errorMsg);
         passwordField.clear();
         passwordField.focus();
     }
+
 
     /**
      * Show error message

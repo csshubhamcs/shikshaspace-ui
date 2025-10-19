@@ -354,6 +354,7 @@ public class RegisterView extends VerticalLayout {
         // Re-enable button
         registerButton.setEnabled(true);
         registerButton.setText("Create Account");
+        registerButton.getElement().setProperty("loading", false);
 
         // Show error message
         String errorMsg = "Registration failed. Please try again.";
