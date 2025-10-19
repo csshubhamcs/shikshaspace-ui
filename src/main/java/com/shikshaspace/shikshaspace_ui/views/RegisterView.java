@@ -2,6 +2,7 @@ package com.shikshaspace.shikshaspace_ui.views;
 
 import com.shikshaspace.shikshaspace_ui.dto.AuthResponse;
 import com.shikshaspace.shikshaspace_ui.dto.RegisterRequest;
+import com.shikshaspace.shikshaspace_ui.service.SecurityUtils;
 import com.shikshaspace.shikshaspace_ui.service.UserServiceClient;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -287,11 +288,15 @@ public class RegisterView extends VerticalLayout {
                     .block(Duration.ofSeconds(15));  // ← BLOCK HERE (longer for registration)
 
             if (response != null && response.getToken() != null) {
-                // Success - auto-login
-                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                // Authenticate user in Spring Security
+                SecurityUtils.authenticateUser(
+                        response.getUsername(),
+                        response.getUserId(),
+                        response.getToken()
+                );
+
+                // Store refresh token separately
                 VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
-                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
-                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
 
                 // Show success
                 Notification.show("Account created! Welcome, " + response.getUsername() + "!",
@@ -300,6 +305,7 @@ public class RegisterView extends VerticalLayout {
 
                 // Navigate to home
                 UI.getCurrent().navigate("");
+
             } else {
                 throw new RuntimeException("Invalid response from server");
             }

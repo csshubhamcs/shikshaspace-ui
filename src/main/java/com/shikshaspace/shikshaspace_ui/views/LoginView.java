@@ -2,6 +2,7 @@ package com.shikshaspace.shikshaspace_ui.views;
 
 import com.shikshaspace.shikshaspace_ui.dto.AuthResponse;
 import com.shikshaspace.shikshaspace_ui.dto.LoginRequest;
+import com.shikshaspace.shikshaspace_ui.service.SecurityUtils;
 import com.shikshaspace.shikshaspace_ui.service.UserServiceClient;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -178,11 +179,15 @@ public class LoginView extends VerticalLayout {
                     .block(Duration.ofSeconds(10));  // ← BLOCK HERE
 
             if (response != null && response.getToken() != null) {
-                // Success - store tokens
-                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                // Authenticate user in Spring Security
+                SecurityUtils.authenticateUser(
+                        response.getUsername(),
+                        response.getUserId(),
+                        response.getToken()
+                );
+
+                // Store refresh token separately
                 VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
-                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
-                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
 
                 // Show success
                 Notification.show("Welcome back, " + response.getUsername() + "!",
@@ -191,6 +196,7 @@ public class LoginView extends VerticalLayout {
 
                 // Navigate to home
                 UI.getCurrent().navigate("");
+
             } else {
                 throw new RuntimeException("Invalid response from server");
             }
