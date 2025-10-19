@@ -24,6 +24,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.VaadinSession;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
+
 /**
  * Registration view for new users
  * Includes form validation and User Service integration
@@ -251,69 +253,76 @@ public class RegisterView extends VerticalLayout {
      * Handle registration form submission
      */
     private void handleRegister() {
-        // Clear previous errors
-        errorMessage.setVisible(false);
-        
-        // Get field values
-        String firstName = firstNameField.getValue().trim();
-        String lastName = lastNameField.getValue().trim();
-        String username = usernameField.getValue().trim();
-        String email = emailField.getValue().trim();
-        String password = passwordField.getValue();
-        String confirmPassword = confirmPasswordField.getValue();
+        // Validate all fields
+        if (firstNameField.getValue().isBlank() || lastNameField.getValue().isBlank() ||
+                usernameField.getValue().isBlank() || emailField.getValue().isBlank() ||
+                passwordField.getValue().isBlank() || confirmPasswordField.getValue().isBlank()) {
 
-        // Validate inputs
-        if (firstName.isEmpty()) {
-            showError("Please enter your first name");
-            firstNameField.focus();
+            showError("All fields are required");
             return;
         }
 
-        if (lastName.isEmpty()) {
-            showError("Please enter your last name");
-            lastNameField.focus();
-            return;
-        }
-
-        if (username.isEmpty() || username.length() < 3) {
-            showError("Username must be at least 3 characters");
-            usernameField.focus();
-            return;
-        }
-
-        if (email.isEmpty() || !isValidEmail(email)) {
-            showError("Please enter a valid email address");
-            emailField.focus();
-            return;
-        }
-
-        if (password.isEmpty() || password.length() < 6) {
-            showError("Password must be at least 6 characters");
-            passwordField.focus();
-            return;
-        }
-
-        if (!password.equals(confirmPassword)) {
+        if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
             showError("Passwords do not match");
-            confirmPasswordField.focus();
-            confirmPasswordField.clear();
             return;
         }
 
-        // Disable button during processing
+        // Show loading state
         registerButton.setEnabled(false);
-        registerButton.setText("Creating account...");
+        registerButton.setText("Creating Account...");
+        errorMessage.setVisible(false);
 
-        // Call User Service
-        RegisterRequest request = new RegisterRequest(firstName, lastName, username, email, password);
+        try {
+            // BLOCKING CALL - Appropriate for Vaadin UI
+            RegisterRequest request = new RegisterRequest(
+                    firstNameField.getValue(),
+                    lastNameField.getValue(),
+                    usernameField.getValue(),
+                    emailField.getValue(),
+                    passwordField.getValue()
+            );
 
+            AuthResponse response = userServiceClient
+                    .register(request)
+                    .block(Duration.ofSeconds(15));  // ← BLOCK HERE (longer for registration)
 
-        userServiceClient.register(request)
-                .subscribe(
-                        this::handleRegisterSuccess,
-                        this::handleRegisterError
-                );
+            if (response != null && response.getToken() != null) {
+                // Success - auto-login
+                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
+                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
+                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
+
+                // Show success
+                Notification.show("Account created! Welcome, " + response.getUsername() + "!",
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+                // Navigate to home
+                UI.getCurrent().navigate("");
+            } else {
+                throw new RuntimeException("Invalid response from server");
+            }
+
+        } catch (Exception e) {
+            log.error("Registration failed for user: {}", usernameField.getValue(), e);
+
+            // Re-enable button
+            registerButton.setEnabled(true);
+            registerButton.setText("Create Account");
+
+            // Show error
+            String errorMsg = "Registration failed. Please try again.";
+            if (e.getMessage() != null && e.getMessage().contains("409")) {
+                errorMsg = "Username or email already exists. Please use different credentials.";
+            } else if (e.getMessage() != null && e.getMessage().contains("timeout")) {
+                errorMsg = "Connection timeout. Check your internet connection.";
+            }
+
+            showError(errorMsg);
+        }
     }
+
 
     /**
      * Validate email format

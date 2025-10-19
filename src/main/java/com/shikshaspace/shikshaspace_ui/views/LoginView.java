@@ -22,6 +22,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.VaadinSession;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
+
 /**
  * Login view with username/password authentication
  * Integrates with User Service for authentication
@@ -156,38 +158,70 @@ public class LoginView extends VerticalLayout {
      * Handle login form submission
      */
     private void handleLogin() {
-        // Clear previous errors
-        errorMessage.setVisible(false);
-        
-        // Validate inputs
-        String username = usernameField.getValue().trim();
+        String username = usernameField.getValue();
         String password = passwordField.getValue();
 
-        if (username.isEmpty()) {
-            showError("Please enter username or email");
-            usernameField.focus();
+        if (username.isBlank() || password.isBlank()) {
+            showError("Please enter both username and password");
             return;
         }
 
-        if (password.isEmpty()) {
-            showError("Please enter password");
-            passwordField.focus();
-            return;
-        }
-
-        // Disable button during processing
+        // Show loading state
         loginButton.setEnabled(false);
         loginButton.setText("Logging in...");
+        errorMessage.setVisible(false);
 
-        // Call User Service
-        LoginRequest request = new LoginRequest(username, password);
-        
-        userServiceClient.login(request)
-                .subscribe(
-                        this::handleLoginSuccess,
-                        this::handleLoginError
-                );
+        try {
+            // BLOCKING CALL - Appropriate for Vaadin UI
+            AuthResponse response = userServiceClient
+                    .login(new LoginRequest(username, password))
+                    .block(Duration.ofSeconds(10));  // ← BLOCK HERE
+
+            if (response != null && response.getToken() != null) {
+                // Success - store tokens
+                VaadinSession.getCurrent().setAttribute("jwt_token", response.getToken());
+                VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
+                VaadinSession.getCurrent().setAttribute("username", response.getUsername());
+                VaadinSession.getCurrent().setAttribute("user_id", response.getUserId());
+
+                // Show success
+                Notification.show("Welcome back, " + response.getUsername() + "!",
+                                3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+                // Navigate to home
+                UI.getCurrent().navigate("");
+            } else {
+                throw new RuntimeException("Invalid response from server");
+            }
+
+        } catch (Exception e) {
+            log.error("Login failed for user: {}", username, e);
+
+            // Re-enable button
+            loginButton.setEnabled(true);
+            loginButton.setText("Login");
+
+            // Show error
+            String errorMsg = "Login failed. Please try again.";
+            if (e.getMessage() != null && e.getMessage().contains("401")) {
+                errorMsg = "Invalid username or password. Please try again or register.";
+
+                Notification.show(
+                        "Don't have an account? Click Register below.",
+                        5000,
+                        Notification.Position.TOP_CENTER
+                ).addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+            } else if (e.getMessage() != null && e.getMessage().contains("timeout")) {
+                errorMsg = "Connection timeout. Check your internet connection.";
+            }
+
+            showError(errorMsg);
+            passwordField.clear();
+            passwordField.focus();
+        }
     }
+
 
     /**
      * Handle successful login
