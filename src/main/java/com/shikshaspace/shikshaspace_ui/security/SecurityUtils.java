@@ -1,113 +1,134 @@
 package com.shikshaspace.shikshaspace_ui.security;
 
-import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.UUID;
 
 /**
- * Security utility methods for authentication and user info
+ * Production-grade security utilities
+ * Single source of truth for authentication
  */
 public class SecurityUtils {
 
     /**
-     * Get current authenticated user
+     * Authenticate user in Spring Security context after successful login/registration
+     * This prevents redirect loop issues
      */
-    public static Optional<Authentication> getAuthentication() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        return Optional.ofNullable(context.getAuthentication());
+    public static void authenticateUser(String username, UUID userId, String jwtToken, String email) {
+        // Create Spring Security Authentication object
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                username,
+                null, // credentials not needed after authentication
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        // Set in Spring SecurityContext
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(auth);
+
+        // Store SecurityContext in HTTP session for Spring Security
+        VaadinSession.getCurrent().getSession().setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                securityContext
+        );
+
+        // Store tokens and user data in VaadinSession for API calls
+        VaadinSession.getCurrent().setAttribute("jwt_token", jwtToken);
+        VaadinSession.getCurrent().setAttribute("username", username);
+        VaadinSession.getCurrent().setAttribute("user_id", userId);
+        VaadinSession.getCurrent().setAttribute("email", email);
     }
 
     /**
      * Check if user is authenticated
      */
     public static boolean isAuthenticated() {
-        return getAuthentication()
-                .map(Authentication::isAuthenticated)
-                .orElse(false);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null &&
+                auth.isAuthenticated() &&
+                !"anonymousUser".equals(auth.getPrincipal());
     }
 
     /**
-     * Get current username
+     * Get current authenticated username
+     */
+    public static String getCurrentUsername() {
+        if (!isAuthenticated()) {
+            return null;
+        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getName();
+    }
+
+    /**
+     * Get JWT token from session
+     * REQUIRED BY: ProfileView, API calls
+     */
+    public static String getJwtToken() {
+        if (VaadinSession.getCurrent() == null) {
+            return null;
+        }
+        return (String) VaadinSession.getCurrent().getAttribute("jwt_token");
+    }
+
+    /**
+     * Get refresh token from session
+     */
+    public static String getRefreshToken() {
+        if (VaadinSession.getCurrent() == null) {
+            return null;
+        }
+        return (String) VaadinSession.getCurrent().getAttribute("refresh_token");
+    }
+
+    /**
+     * Get user ID from session
+     */
+    public static UUID getUserId() {
+        if (VaadinSession.getCurrent() == null) {
+            return null;
+        }
+        return (UUID) VaadinSession.getCurrent().getAttribute("user_id");
+    }
+
+    /**
+     * Get username from session
+     * REQUIRED BY: MainLayout
      */
     public static String getUsername() {
-        return getAuthentication()
-                .map(auth -> {
-                    if (auth.getPrincipal() instanceof OidcUser) {
-                        OidcUser oidcUser = (OidcUser) auth.getPrincipal();
-                        return oidcUser.getPreferredUsername();
-                    }
-                    return auth.getName();
-                })
-                .orElse("Anonymous");
+        if (VaadinSession.getCurrent() == null) {
+            return "Anonymous";
+        }
+        String username = (String) VaadinSession.getCurrent().getAttribute("username");
+        return username != null ? username : "Anonymous";
     }
 
     /**
-     * Get user email
+     * Get user email from session
+     * REQUIRED BY: MainLayout
+     * Note: Email is not stored in session currently, needs to be added during login
      */
     public static String getEmail() {
-        return getAuthentication()
-                .map(auth -> {
-                    if (auth.getPrincipal() instanceof OidcUser) {
-                        OidcUser oidcUser = (OidcUser) auth.getPrincipal();
-                        return oidcUser.getEmail();
-                    }
-                    return null;
-                })
-                .orElse(null);
+        if (VaadinSession.getCurrent() == null) {
+            return null;
+        }
+        return (String) VaadinSession.getCurrent().getAttribute("email");
     }
 
     /**
-     * Get full name
-     */
-    public static String getFullName() {
-        return getAuthentication()
-                .map(auth -> {
-                    if (auth.getPrincipal() instanceof OidcUser) {
-                        OidcUser oidcUser = (OidcUser) auth.getPrincipal();
-                        String firstName = oidcUser.getGivenName();
-                        String lastName = oidcUser.getFamilyName();
-                        if (firstName != null && lastName != null) {
-                            return firstName + " " + lastName;
-                        }
-                        return oidcUser.getFullName();
-                    }
-                    return auth.getName();
-                })
-                .orElse("User");
-    }
-
-
-    /**
-     * Logout current user
+     * Logout - clear all authentication and session
      */
     public static void logout() {
-        VaadinServletRequest request = VaadinServletRequest.getCurrent();
-        if (request != null) {
-            SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-            logoutHandler.logout(
-                    request.getHttpServletRequest(),
-                    null,
-                    null
-            );
-        }
         SecurityContextHolder.clearContext();
-    }
-
-    /**
-     * Get access token from session
-     */
-    public static String getAccessToken() {
-        VaadinSession session = VaadinSession.getCurrent();
-        if (session != null) {
-            return (String) session.getAttribute("jwt_token");
+        if (VaadinSession.getCurrent() != null) {
+            VaadinSession.getCurrent().getSession().invalidate();
         }
-        return null;
     }
-
 }

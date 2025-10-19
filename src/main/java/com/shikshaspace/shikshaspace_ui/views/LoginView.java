@@ -2,7 +2,7 @@ package com.shikshaspace.shikshaspace_ui.views;
 
 import com.shikshaspace.shikshaspace_ui.dto.AuthResponse;
 import com.shikshaspace.shikshaspace_ui.dto.LoginRequest;
-import com.shikshaspace.shikshaspace_ui.service.SecurityUtils;
+import com.shikshaspace.shikshaspace_ui.security.SecurityUtils;
 import com.shikshaspace.shikshaspace_ui.service.UserServiceClient;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -183,7 +183,8 @@ public class LoginView extends VerticalLayout {
                 SecurityUtils.authenticateUser(
                         response.getUsername(),
                         response.getUserId(),
-                        response.getToken()
+                        response.getToken(),
+                        response.getEmail()
                 );
 
                 // Store refresh token separately

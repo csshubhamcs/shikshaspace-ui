@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.UUID;
 
 /**
  * REST client to communicate with User Service
@@ -113,5 +114,38 @@ public class UserServiceClient {
                 .timeout(Duration.ofMillis(timeout))
                 .doOnSuccess(response -> log.info("Token refreshed successfully"))
                 .doOnError(error -> log.error("Token refresh failed", error));
+    }
+
+    /**
+     * Get current authenticated user profile
+     */
+    public Mono<UserResponse> getCurrentUserProfile(String jwtToken) {
+        log.debug("Fetching current user profile");
+
+        return webClient.get()
+                .uri("/api/users/me")
+                .header("Authorization", "Bearer " + jwtToken)
+                .retrieve()
+                .bodyToMono(UserResponse.class)
+                .timeout(Duration.ofMillis(timeout))
+                .doOnSuccess(response -> log.info("Profile loaded for user: {}", response.getUsername()))
+                .doOnError(error -> log.error("Failed to load profile", error));
+    }
+
+    /**
+     * Update user profile
+     */
+    public Mono<UserResponse> updateProfile(UUID userId, UpdateProfileRequest request, String jwtToken) {
+        log.debug("Updating profile for user: {}", userId);
+
+        return webClient.put()
+                .uri("/api/users/" + userId)
+                .header("Authorization", "Bearer " + jwtToken)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(UserResponse.class)
+                .timeout(Duration.ofMillis(timeout))
+                .doOnSuccess(response -> log.info("Profile updated for user: {}", userId))
+                .doOnError(error -> log.error("Failed to update profile for user: {}", userId, error));
     }
 }
