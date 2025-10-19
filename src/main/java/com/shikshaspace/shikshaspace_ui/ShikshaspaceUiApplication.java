@@ -1,13 +1,15 @@
 package com.shikshaspace.shikshaspace_ui;
 
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ShikshaspaceUiApplication {
+//@Theme("my-theme")
+public class ShikshaspaceUiApplication implements AppShellConfigurator {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShikshaspaceUiApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ShikshaspaceUiApplication.class, args);
+    }
 }
