@@ -8,16 +8,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileDTO {
-    private String id;
-    private String username;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private Integer age;
-    private String bio;
-    private String mobileNumber;
-    private Double experience;
-    private String profileImageUrl;
-    private String linkedinUrl;
-    private String githubUrl;
+  private String id;
+  private String username;
+  private String email;
+  private String firstName;
+  private String lastName;
+  private Integer age;
+  private String bio;
+  private String mobileNumber;
+  private Double experience;
+  private String profileImageUrl;
+  private String linkedinUrl;
+  private String githubUrl;
 }

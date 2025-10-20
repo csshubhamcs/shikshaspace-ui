@@ -208,3 +208,70 @@ body {
     display: none !important;
   }
 }
+
+/**
+ * Global Cursor Fix
+ * Remove small circle pointer, use proper cursors
+ */
+
+/* Default cursor for body and containers */
+body,
+html,
+vaadin-app-layout,
+vaadin-vertical-layout,
+vaadin-horizontal-layout,
+.v-system-error {
+    cursor: default !important;
+}
+
+/* Text cursor for all input fields */
+vaadin-text-field,
+vaadin-password-field,
+vaadin-email-field,
+vaadin-text-area,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    cursor: text !important;
+}
+
+/* Pointer cursor for clickable elements */
+vaadin-button,
+button,
+a,
+vaadin-menu-bar-button,
+.clickable,
+[role="button"] {
+    cursor: pointer !important;
+}
+
+/* Logo in header should be default cursor */
+.header-logo {
+    cursor: default !important;
+}
+
+/* Menu items should have pointer */
+vaadin-menu-bar-item,
+vaadin-context-menu-item {
+    cursor: pointer !important;
+}
+
+/* Avatar should have pointer if clickable */
+vaadin-avatar {
+    cursor: pointer !important;
+}
+
+/* Disabled elements */
+vaadin-button[disabled],
+button[disabled],
+[disabled] {
+    cursor: not-allowed !important;
+}
+
+/* Profile card text should be default */
+.profile-card span,
+.profile-card p {
+    cursor: default !important;
+}
+
