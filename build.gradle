@@ -57,3 +57,14 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.register('buildProduction') {
+    dependsOn 'vaadinBuildFrontend'
+    dependsOn 'bootJar'
+    description = 'Builds optimized production bundle'
+    group = 'build'
+}
+
+vaadin {
+    productionMode = true
+}

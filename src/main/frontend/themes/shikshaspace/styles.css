@@ -1,0 +1,210 @@
+/* ============================================
+   ShikshaSpace Theme - Main Styles
+   Production-Ready Responsive Design
+   ============================================ */
+
+/* Import base Lumo utilities @import url('lumo-utility.css');*/
+
+
+/* Import all custom responsive styles */
+@import url('../../styles/responsive-styles.css');
+@import url('../../styles/main-layout-responsive.css');
+@import url('../../styles/login-view-responsive.css');
+@import url('../../styles/register-view-responsive.css');
+@import url('../../styles/home-page-responsive.css');
+@import url('../../styles/profile-view-responsive.css');
+@import url('../../styles/profile-edit-dialog-responsive.css');
+@import url('../../styles/premium-micro-interactions.css');
+
+/* ============================================
+   Global Theme Variables
+   ============================================ */
+
+html {
+  /* Primary colors */
+  --lumo-primary-color: #667eea;
+  --lumo-primary-color-50pct: rgba(102, 126, 234, 0.5);
+  --lumo-primary-color-10pct: rgba(102, 126, 234, 0.1);
+  --lumo-primary-text-color: #667eea;
+
+  /* Secondary colors */
+  --secondary-color: #764ba2;
+  --primary-dark: #5568d3;
+
+  /* Enhanced shadows */
+  --lumo-box-shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.05);
+  --lumo-box-shadow-s: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --lumo-box-shadow-m: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --lumo-box-shadow-l: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --lumo-box-shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+
+  /* Modern border radius */
+  --lumo-border-radius-s: 8px;
+  --lumo-border-radius-m: 12px;
+  --lumo-border-radius-l: 16px;
+
+  /* Improved spacing */
+  --lumo-space-xs: 0.25rem;
+  --lumo-space-s: 0.5rem;
+  --lumo-space-m: 1rem;
+  --lumo-space-l: 1.5rem;
+  --lumo-space-xl: 2rem;
+
+  /* Better font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+   Smooth Scrolling
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   Text Selection
+   ============================================ */
+
+::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: #333;
+}
+
+::-moz-selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: #333;
+}
+
+/* ============================================
+   Global Transitions
+   ============================================ */
+
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5568d3, #653a8c);
+}
+
+/* ============================================
+   Focus Visible (Accessibility)
+   ============================================ */
+
+*:focus-visible {
+  outline: 3px solid rgba(102, 126, 234, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+}
+
+/* ============================================
+   Responsive Base Styles
+   ============================================ */
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ============================================
+   Accessibility - Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   High Contrast Mode Support
+   ============================================ */
+
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+
+  button {
+    border: 3px solid currentColor !important;
+  }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

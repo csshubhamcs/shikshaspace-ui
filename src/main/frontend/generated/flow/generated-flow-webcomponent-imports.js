@@ -30,10 +30,10 @@ import 'Frontend/generated/jar-resources/ReactRouterOutletElement.tsx';
 const loadOnDemand = (key) => {
   const pending = [];
   if (key === 'f68cc5759feaf39be7ecb21e5d866b6d9597c70b1f3b36570793189c51931b64') {
-    pending.push(import('./chunks/chunk-193f5ed0e3315de7f95341217ee386f2e46945767240f7dbc7946fa66f36d335.js'));
+    pending.push(import('./chunks/chunk-cdd5af88ba3cfea9f9039051639641c99cf9bc2bd4434c9ce88f45c6f76790d4.js'));
   }
   if (key === 'b8090334c38146b0b8bc46ef33ecdbcbdffd5b46bd172dd9015ddd39c2497bf5') {
-    pending.push(import('./chunks/chunk-1fa467e2af633a62d7081236ed2cac22a753be6243120465f1730d096145430f.js'));
+    pending.push(import('./chunks/chunk-4a6c73c28087746822ff59ec4d0cdc0ce8472c8439f53bd430c23b23239ce5ce.js'));
   }
   return Promise.all(pending);
 }

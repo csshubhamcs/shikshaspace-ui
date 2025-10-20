@@ -1,0 +1,142 @@
+/**
+ * Production-grade responsive CSS for ProfileView
+ * Modern profile card design with premium animations
+ */
+
+/* ==================== PROFILE VIEW CONTAINER ==================== */
+.profile-view-container {
+    background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+}
+
+/* ==================== PROFILE HEADER CARD ==================== */
+.profile-header-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Desktop hover effect */
+@media (min-width: 1025px) {
+    .profile-header-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15) !important;
+    }
+}
+
+/* ==================== PROFILE CARD CONTENT LAYOUT ==================== */
+@media (max-width: 768px) {
+    .profile-card-content {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center;
+    }
+
+    .info-section {
+        align-items: center !important;
+    }
+
+    .profile-edit-button {
+        width: 100%;
+        align-self: stretch !important;
+        justify-content: center;
+    }
+}
+
+/* ==================== AVATAR ANIMATIONS ==================== */
+.profile-avatar {
+    animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ==================== INFO CARDS ==================== */
+.profile-info-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    transition: left 0.5s;
+}
+
+.profile-info-card:hover::before {
+    left: 100%;
+}
+
+/* ==================== MOBILE OPTIMIZATIONS ==================== */
+@media (max-width: 640px) {
+    .profile-content-wrapper {
+        padding: 16px !important;
+    }
+
+    .profile-header-card {
+        padding: 24px !important;
+        border-radius: 16px !important;
+    }
+
+    .profile-info-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .profile-info-card {
+        padding: 18px !important;
+    }
+}
+
+/* ==================== TABLET OPTIMIZATIONS ==================== */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .profile-info-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ==================== DESKTOP OPTIMIZATIONS ==================== */
+@media (min-width: 1025px) {
+    .profile-info-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==================== SMOOTH TRANSITIONS ==================== */
+.profile-view-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}

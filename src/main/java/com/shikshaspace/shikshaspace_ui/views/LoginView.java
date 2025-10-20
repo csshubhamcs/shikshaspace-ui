@@ -21,13 +21,26 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 
 /**
- * Login view with username/password authentication
- * Integrates with User Service for authentication
+ * Production-grade responsive LoginView with modern premium design
+ * Supports mobile (320px+), tablet (768px+), and desktop (1024px+)
+ *
+ * Features:
+ * - Mobile-first responsive design
+ * - Modern glassmorphism effects
+ * - Smooth animations and transitions
+ * - Touch-friendly buttons (min 44px height)
+ * - Fluid typography using clamp()
+ * - Premium gradient backgrounds
+ * - Enhanced error handling UI
+ *
+ * @author ShikshaSpace Engineering Team
+ * @version 2.0 (Responsive + Premium UI)
  */
 @Slf4j
 @Route("login")
@@ -36,109 +49,76 @@ import java.time.Duration;
 public class LoginView extends VerticalLayout {
 
     private final UserServiceClient userServiceClient;
-    
-    private final TextField usernameField;
-    private final PasswordField passwordField;
-    private final Button loginButton;
-    private final Div errorMessage;
+
+    private  TextField usernameField;
+    private  PasswordField passwordField;
+    private  Button loginButton;
+    private  Div errorMessage;
 
     public LoginView(UserServiceClient userServiceClient) {
         this.userServiceClient = userServiceClient;
-        
-        // Page styling
+
+        // Full-viewport responsive container with gradient background
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
+        addClassName("login-view-container");
+
+        // Modern gradient background with responsive padding
         getStyle()
                 .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-                .set("padding", "20px");
+                .set("padding", "clamp(16px, 4vw, 40px)")
+                .set("min-height", "100vh")
+                .set("position", "relative")
+                .set("overflow-y", "auto");
 
-        // Login card container
+        // Login card container with responsive width
+        VerticalLayout loginCard = createLoginCard();
+
+        add(loginCard);
+    }
+
+    /**
+     * Create responsive login card with premium design
+     */
+    private VerticalLayout createLoginCard() {
         VerticalLayout loginCard = new VerticalLayout();
-        loginCard.setWidth("400px");
         loginCard.setPadding(true);
+        loginCard.setSpacing(true);
+        loginCard.addClassName("login-card-responsive");
+
+        // Responsive width using clamp for fluid sizing
         loginCard.getStyle()
-                .set("background", "white")
-                .set("border-radius", "12px")
-                .set("box-shadow", "0 8px 32px rgba(0,0,0,0.1)");
+                .set("width", "100%")
+                .set("max-width", "clamp(320px, 90vw, 450px)")
+                .set("background", "rgba(255, 255, 255, 0.98)")
+                .set("border-radius", "clamp(12px, 2vw, 20px)")
+                .set("box-shadow", "0 8px 32px rgba(0, 0, 0, 0.15), 0 20px 60px rgba(102, 126, 234, 0.2)")
+                .set("padding", "clamp(24px, 5vw, 48px)")
+                .set("backdrop-filter", "blur(10px)")
+                .set("border", "1px solid rgba(255, 255, 255, 0.3)")
+                .set("transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
 
-        // Logo/Title
-        H1 logo = new H1("ShikshaSpace");
-        logo.getStyle()
-                .set("color", "#667eea")
-                .set("margin", "0")
-                .set("text-align", "center");
+        // Logo with gradient text and fluid typography
+        H1 logo = createLogo();
 
-        H2 welcomeText = new H2("Welcome Back!");
-        welcomeText.getStyle()
-                .set("color", "#333")
-                .set("margin-top", "0")
-                .set("font-weight", "400")
-                .set("text-align", "center");
+        // Welcome text with responsive sizing
+        H2 welcomeText = createWelcomeText();
 
         // Error message container
-        errorMessage = new Div();
-        errorMessage.setVisible(false);
-        errorMessage.getStyle()
-                .set("color", "white")
-                .set("background", "#f44336")
-                .set("padding", "10px")
-                .set("border-radius", "6px")
-                .set("margin-bottom", "15px")
-                .set("text-align", "center");
+        errorMessage = createErrorMessage();
 
-        // Username field
-        usernameField = new TextField("Username or Email");
-        usernameField.setWidthFull();
-        usernameField.setPlaceholder("Enter your username");
-        usernameField.setRequired(true);
-        usernameField.setClearButtonVisible(true);
+        // Username field with modern styling
+        usernameField = createUsernameField();
 
-        // Password field
-        passwordField = new PasswordField("Password");
-        passwordField.setWidthFull();
-        passwordField.setPlaceholder("Enter your password");
-        passwordField.setRequired(true);
-        passwordField.setRevealButtonVisible(true);
+        // Password field with modern styling
+        passwordField = createPasswordField();
 
-        // Login button
-        loginButton = new Button("Login");
-        loginButton.setWidthFull();
-        loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
-        loginButton.getStyle().set("margin-top", "10px");
-        loginButton.addClickListener(event -> handleLogin());
+        // Login button with premium design
+        loginButton = createLoginButton();
 
-        // Enter key shortcut
-        passwordField.addKeyPressListener(event -> {
-            if (event.getKey().equals("Enter")) {
-                handleLogin();
-            }
-        });
-
-        // Register link - More prominent
-        Div registerContainer = new Div();
-        registerContainer.getStyle()
-                .set("text-align", "center")
-                .set("margin-top", "20px")
-                .set("padding", "15px")
-                .set("background", "#f5f7ff")
-                .set("border-radius", "8px")
-                .set("border", "1px solid #667eea");
-
-        Paragraph registerText = new Paragraph();
-        registerText.getStyle().set("margin", "0").set("color", "#333");
-        registerText.setText("Don't have an account? ");
-
-        RouterLink registerLink = new RouterLink("Register now", RegisterView.class);
-        registerLink.getStyle()
-                .set("color", "#667eea")
-                .set("font-weight", "600")
-                .set("text-decoration", "none")
-                .set("font-size", "16px");
-
-        registerText.add(registerLink);
-        registerContainer.add(registerText);
-
+        // Register link container
+        Div registerContainer = createRegisterContainer();
 
         // Assemble login card
         loginCard.add(
@@ -148,15 +128,265 @@ public class LoginView extends VerticalLayout {
                 usernameField,
                 passwordField,
                 loginButton,
-                registerContainer  // Changed from registerText
+                registerContainer
         );
 
+        return loginCard;
+    }
 
-        add(loginCard);
+    /**
+     * Create responsive logo with gradient text effect
+     */
+    private H1 createLogo() {
+        H1 logo = new H1("ShikshaSpace");
+        logo.addClassNames(
+                LumoUtility.Margin.NONE,
+                LumoUtility.Margin.Bottom.MEDIUM,
+                "login-logo"
+        );
+        logo.getStyle()
+                .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
+                .set("-webkit-background-clip", "text")
+                .set("-webkit-text-fill-color", "transparent")
+                .set("background-clip", "text")
+                .set("font-size", "clamp(1.75rem, 6vw, 2.5rem)")
+                .set("font-weight", "700")
+                .set("text-align", "center")
+                .set("letter-spacing", "0.5px")
+                .set("margin-bottom", "8px");
+
+        return logo;
+    }
+
+    /**
+     * Create welcome text with responsive sizing
+     */
+    private H2 createWelcomeText() {
+        H2 welcomeText = new H2("Welcome Back!");
+        welcomeText.addClassNames(
+                LumoUtility.Margin.Top.NONE,
+                LumoUtility.Margin.Bottom.LARGE,
+                "welcome-text"
+        );
+        welcomeText.getStyle()
+                .set("color", "#333")
+                .set("font-weight", "400")
+                .set("text-align", "center")
+                .set("font-size", "clamp(1rem, 3vw, 1.5rem)")
+                .set("margin-bottom", "clamp(16px, 4vw, 24px)");
+
+        return welcomeText;
+    }
+
+    /**
+     * Create error message container with modern styling
+     */
+    private Div createErrorMessage() {
+        Div error = new Div();
+        error.setVisible(false);
+        error.addClassName("error-message-box");
+        error.getStyle()
+                .set("color", "white")
+                .set("background", "linear-gradient(135deg, #f44336 0%, #e91e63 100%)")
+                .set("padding", "clamp(12px, 3vw, 16px)")
+                .set("border-radius", "10px")
+                .set("margin-bottom", "20px")
+                .set("text-align", "center")
+                .set("font-size", "clamp(13px, 2.5vw, 14px)")
+                .set("font-weight", "500")
+                .set("box-shadow", "0 4px 12px rgba(244, 67, 54, 0.3)")
+                .set("animation", "slideDown 0.3s ease-out")
+                .set("border", "1px solid rgba(255, 255, 255, 0.2)");
+
+        return error;
+    }
+
+    /**
+     * Create username field with premium styling
+     */
+    private TextField createUsernameField() {
+        TextField field = new TextField("Username or Email");
+        field.setWidthFull();
+        field.setPlaceholder("Enter your username");
+        field.setRequired(true);
+        field.setClearButtonVisible(true);
+        field.addClassName("premium-input-field");
+
+        // Modern input styling with responsive sizing
+        field.getStyle()
+                .set("--vaadin-input-field-border-radius", "10px")
+                .set("--vaadin-input-field-background", "linear-gradient(145deg, #ffffff, #f8f9ff)")
+                .set("--vaadin-input-field-border-width", "2px")
+                .set("--vaadin-input-field-border-color", "transparent")
+                .set("--vaadin-input-field-hover-highlight", "#667eea")
+                .set("margin-bottom", "clamp(12px, 2.5vw, 16px)")
+                .set("font-size", "clamp(14px, 2.5vw, 16px)")
+                .set("transition", "all 0.3s ease");
+
+        // Add focus enhancement
+        field.addFocusListener(e -> {
+            field.getStyle()
+                    .set("box-shadow", "0 0 0 4px rgba(102, 126, 234, 0.1)")
+                    .set("transform", "translateY(-2px)");
+        });
+
+        field.addBlurListener(e -> {
+            field.getStyle()
+                    .set("box-shadow", "none")
+                    .set("transform", "translateY(0)");
+        });
+
+        return field;
+    }
+
+    /**
+     * Create password field with premium styling
+     */
+    private PasswordField createPasswordField() {
+        PasswordField field = new PasswordField("Password");
+        field.setWidthFull();
+        field.setPlaceholder("Enter your password");
+        field.setRequired(true);
+        field.setRevealButtonVisible(true);
+        field.addClassName("premium-input-field");
+
+        // Modern input styling
+        field.getStyle()
+                .set("--vaadin-input-field-border-radius", "10px")
+                .set("--vaadin-input-field-background", "linear-gradient(145deg, #ffffff, #f8f9ff)")
+                .set("--vaadin-input-field-border-width", "2px")
+                .set("--vaadin-input-field-border-color", "transparent")
+                .set("--vaadin-input-field-hover-highlight", "#667eea")
+                .set("margin-bottom", "clamp(12px, 2.5vw, 16px)")
+                .set("font-size", "clamp(14px, 2.5vw, 16px)")
+                .set("transition", "all 0.3s ease");
+
+        // Add focus enhancement
+        field.addFocusListener(e -> {
+            field.getStyle()
+                    .set("box-shadow", "0 0 0 4px rgba(102, 126, 234, 0.1)")
+                    .set("transform", "translateY(-2px)");
+        });
+
+        field.addBlurListener(e -> {
+            field.getStyle()
+                    .set("box-shadow", "none")
+                    .set("transform", "translateY(0)");
+        });
+
+        // Enter key shortcut for login
+        field.addKeyPressListener(event -> {
+            if (event.getKey().equals("Enter")) {
+                handleLogin();
+            }
+        });
+
+        return field;
+    }
+
+    /**
+     * Create login button with modern premium design and animations
+     */
+    private Button createLoginButton() {
+        Button button = new Button("Login");
+        button.setWidthFull();
+        button.addThemeVariants(
+                ButtonVariant.LUMO_PRIMARY,
+                ButtonVariant.LUMO_LARGE
+        );
+        button.addClassName("premium-login-button");
+
+        // Modern button styling with responsive sizing
+        button.getStyle()
+                .set("margin-top", "clamp(8px, 2vw, 12px)")
+                .set("padding", "clamp(14px, 3vw, 18px)")
+                .set("border-radius", "10px")
+                .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
+                .set("font-weight", "600")
+                .set("font-size", "clamp(15px, 2.5vw, 16px)")
+                .set("letter-spacing", "0.5px")
+                .set("box-shadow", "0 4px 15px rgba(102, 126, 234, 0.4)")
+                .set("transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)")
+                .set("cursor", "pointer")
+                .set("position", "relative")
+                .set("overflow", "hidden")
+                .set("min-height", "44px"); // Touch-friendly
+
+        // Hover effect
+        button.getElement().addEventListener("mouseenter", e -> {
+            button.getStyle()
+                    .set("transform", "translateY(-2px)")
+                    .set("box-shadow", "0 6px 20px rgba(102, 126, 234, 0.5)");
+        });
+
+        button.getElement().addEventListener("mouseleave", e -> {
+            button.getStyle()
+                    .set("transform", "translateY(0)")
+                    .set("box-shadow", "0 4px 15px rgba(102, 126, 234, 0.4)");
+        });
+
+        button.addClickListener(event -> handleLogin());
+
+        return button;
+    }
+
+    /**
+     * Create register container with modern styling
+     */
+    private Div createRegisterContainer() {
+        Div registerContainer = new Div();
+        registerContainer.addClassName("register-container");
+        registerContainer.getStyle()
+                .set("text-align", "center")
+                .set("margin-top", "clamp(20px, 4vw, 28px)")
+                .set("padding", "clamp(16px, 3vw, 20px)")
+                .set("background", "linear-gradient(145deg, #f8f9ff, #ffffff)")
+                .set("border-radius", "10px")
+                .set("border", "2px solid rgba(102, 126, 234, 0.15)")
+                .set("transition", "all 0.3s ease");
+
+        Paragraph registerText = new Paragraph();
+        registerText.addClassName("register-text");
+        registerText.getStyle()
+                .set("margin", "0")
+                .set("color", "#555")
+                .set("font-size", "clamp(13px, 2.5vw, 15px)")
+                .set("line-height", "1.6");
+
+        registerText.setText("Don't have an account? ");
+
+        RouterLink registerLink = new RouterLink("Register now", RegisterView.class);
+        registerLink.addClassName("register-link");
+        registerLink.getStyle()
+                .set("color", "#667eea")
+                .set("font-weight", "600")
+                .set("text-decoration", "none")
+                .set("font-size", "clamp(14px, 2.5vw, 16px)")
+                .set("transition", "all 0.2s ease")
+                .set("border-bottom", "2px solid transparent");
+
+        // Hover effect for register link
+        registerLink.getElement().addEventListener("mouseenter", e -> {
+            registerLink.getStyle()
+                    .set("color", "#764ba2")
+                    .set("border-bottom-color", "#764ba2");
+        });
+
+        registerLink.getElement().addEventListener("mouseleave", e -> {
+            registerLink.getStyle()
+                    .set("color", "#667eea")
+                    .set("border-bottom-color", "transparent");
+        });
+
+        registerText.add(registerLink);
+        registerContainer.add(registerText);
+
+        return registerContainer;
     }
 
     /**
      * Handle login form submission
+     * ALL ORIGINAL LOGIC PRESERVED
      */
     private void handleLogin() {
         String username = usernameField.getValue();
@@ -167,16 +397,17 @@ public class LoginView extends VerticalLayout {
             return;
         }
 
-        // Show loading state
+        // Show loading state with modern animation
         loginButton.setEnabled(false);
         loginButton.setText("Logging in...");
+        loginButton.getStyle().set("opacity", "0.7");
         errorMessage.setVisible(false);
 
         try {
             // BLOCKING CALL - Appropriate for Vaadin UI
             AuthResponse response = userServiceClient
                     .login(new LoginRequest(username, password))
-                    .block(Duration.ofSeconds(10));  // ← BLOCK HERE
+                    .block(Duration.ofSeconds(10));
 
             if (response != null && response.getToken() != null) {
                 // Authenticate user in Spring Security
@@ -190,7 +421,7 @@ public class LoginView extends VerticalLayout {
                 // Store refresh token separately
                 VaadinSession.getCurrent().setAttribute("refresh_token", response.getRefreshToken());
 
-                // Show success
+                // Show success with modern notification
                 Notification.show("Welcome back, " + response.getUsername() + "!",
                                 3000, Notification.Position.TOP_CENTER)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -208,6 +439,7 @@ public class LoginView extends VerticalLayout {
             // Re-enable button
             loginButton.setEnabled(true);
             loginButton.setText("Login");
+            loginButton.getStyle().set("opacity", "1");
 
             // Show error
             String errorMsg = "Login failed. Please try again.";
@@ -229,9 +461,9 @@ public class LoginView extends VerticalLayout {
         }
     }
 
-
     /**
      * Handle successful login
+     * PRESERVED FROM ORIGINAL
      */
     private void handleLoginSuccess(AuthResponse response) {
         log.info("Login successful for user: {}", response.getUsername());
@@ -256,9 +488,9 @@ public class LoginView extends VerticalLayout {
         }
     }
 
-
     /**
      * Handle login error
+     * PRESERVED FROM ORIGINAL
      */
     private void handleLoginError(Throwable error) {
         log.error("Login failed", error);
@@ -271,6 +503,7 @@ public class LoginView extends VerticalLayout {
                 loginButton.setEnabled(true);
                 loginButton.setText("Login");
                 loginButton.getElement().setProperty("loading", false);
+                loginButton.getStyle().set("opacity", "1");
 
                 // Show detailed error message
                 String errorMsg = "Login failed. Please try again.";
@@ -303,13 +536,15 @@ public class LoginView extends VerticalLayout {
         }
     }
 
-
-
     /**
-     * Show error message
+     * Show error message with animation
      */
     private void showError(String message) {
         errorMessage.setText(message);
         errorMessage.setVisible(true);
+
+        // Add shake animation
+        errorMessage.getStyle()
+                .set("animation", "shake 0.5s ease-in-out");
     }
 }

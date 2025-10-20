@@ -1,0 +1,392 @@
+/**
+ * Production-grade premium micro-interactions and advanced styling
+ * Modern 2025 CSS trends with smooth animations
+ */
+
+/* ==================== ADVANCED INPUT FIELD INTERACTIONS ==================== */
+
+/* Floating label effect on focus */
+.premium-input-field:focus-within label,
+.premium-input-field:not(:placeholder-shown) label {
+    transform: translateY(-24px) scale(0.85);
+    color: #667eea;
+}
+
+/* Input glow effect on focus */
+.premium-input-field input:focus,
+.premium-input-field textarea:focus,
+.premium-dialog-input:focus {
+    box-shadow:
+        0 0 0 4px rgba(102, 126, 234, 0.1),
+        0 4px 12px rgba(102, 126, 234, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    border-color: #667eea !important;
+}
+
+/* Input success state with checkmark animation */
+.premium-input-field.valid::after {
+    content: '✓';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    color: #4caf50;
+    font-weight: bold;
+    animation: checkmarkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes checkmarkPop {
+    0% { transform: translateY(-50%) scale(0) rotate(-180deg); }
+    50% { transform: translateY(-50%) scale(1.2) rotate(0deg); }
+    100% { transform: translateY(-50%) scale(1) rotate(0deg); }
+}
+
+/* Input error shake animation */
+.premium-input-field.error {
+    animation: inputShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes inputShake {
+    10%, 90% { transform: translateX(-8px); }
+    20%, 80% { transform: translateX(8px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+}
+
+/* ==================== ADVANCED BUTTON MICRO-INTERACTIONS ==================== */
+
+/* Button ripple effect on click */
+.premium-button,
+.premium-login-button,
+.premium-register-button,
+.premium-save-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-button::after,
+.premium-login-button::after,
+.premium-register-button::after,
+.premium-save-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.premium-button:active::after,
+.premium-login-button:active::after,
+.premium-register-button:active::after,
+.premium-save-button:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Button magnetic effect (follows cursor) */
+@media (min-width: 1025px) {
+    .premium-button:hover,
+    .premium-login-button:hover,
+    .premium-register-button:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+    }
+}
+
+/* Loading spinner for buttons */
+.premium-button.loading::before,
+.premium-login-button.loading::before,
+.premium-register-button.loading::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: buttonSpinner 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes buttonSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== CARD HOVER 3D TILT EFFECT ==================== */
+@media (min-width: 1025px) {
+    .stat-card,
+    .feature-card,
+    .profile-info-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transform-style: preserve-3d;
+    }
+
+    .stat-card:hover,
+    .feature-card:hover {
+        transform: perspective(1000px) rotateX(2deg) rotateY(2deg) translateY(-8px);
+    }
+}
+
+/* ==================== SMOOTH PAGE TRANSITIONS ==================== */
+@keyframes pageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.home-page-container,
+.profile-view-container,
+.login-view-container,
+.register-view-container {
+    animation: pageFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== SKELETON LOADING ANIMATION ==================== */
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.skeleton-loading {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+/* ==================== TOOLTIP MICRO-INTERACTIONS ==================== */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-tooltip]::before {
+    content: attr(data-tooltip);
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+[data-tooltip]::after {
+    content: '';
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #667eea;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-8px);
+}
+
+/* ==================== NOTIFICATION SLIDE-IN ANIMATION ==================== */
+vaadin-notification-card {
+    animation: notificationSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ==================== SCROLL INDICATOR ==================== */
+.scroll-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    z-index: 9999;
+    transition: width 0.1s ease-out;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* ==================== FOCUS RING (ACCESSIBILITY) ==================== */
+*:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Remove default outline but keep accessibility */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ==================== LINK UNDERLINE ANIMATION ==================== */
+a {
+    position: relative;
+    text-decoration: none;
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover::after {
+    width: 100%;
+}
+
+/* ==================== CURSOR TRAIL EFFECT (DESKTOP ONLY) ==================== */
+@media (min-width: 1025px) {
+    body {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="%23667eea" opacity="0.3"/></svg>') 12 12, auto;
+    }
+}
+
+/* ==================== GLASSMORPHISM UTILITY CLASS ==================== */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+}
+
+/* ==================== GRADIENT TEXT UTILITY ==================== */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ==================== PULSE ANIMATION FOR NOTIFICATIONS ==================== */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.pulse-animation {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==================== STAGGER ANIMATION FOR LISTS ==================== */
+.stagger-animation > * {
+    opacity: 0;
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* ==================== PARALLAX SCROLL EFFECT ==================== */
+@media (min-width: 1025px) {
+    .parallax-bg {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+/* ==================== MORPHING BACKGROUND ==================== */
+@keyframes morphBackground {
+    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+}
+
+.morph-shape {
+    animation: morphBackground 8s ease-in-out infinite;
+}
+
+/* ==================== SMOOTH COLOR TRANSITIONS ==================== */
+* {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== REDUCE MOTION FOR ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==================== HIGH CONTRAST MODE SUPPORT ==================== */
+@media (prefers-contrast: high) {
+    * {
+        border-width: 2px !important;
+    }
+
+    .premium-button,
+    .premium-login-button,
+    .premium-register-button {
+        border: 3px solid white !important;
+    }
+}

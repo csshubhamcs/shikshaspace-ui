@@ -1,0 +1,187 @@
+/**
+ * Production-grade responsive CSS for LoginView
+ * Mobile-first approach with modern premium animations
+ */
+
+/* ==================== LOGIN VIEW CONTAINER ==================== */
+.login-view-container {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: clamp(16px, 4vw, 40px);
+}
+
+/* Animated gradient background */
+.login-view-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ==================== LOGIN CARD ==================== */
+.login-card-responsive {
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card hover effect (desktop only) */
+@media (min-width: 1025px) {
+    .login-card-responsive:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 24px 70px rgba(102, 126, 234, 0.3) !important;
+    }
+}
+
+/* ==================== PREMIUM INPUT FIELDS ==================== */
+.premium-input-field {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-input-field:focus-within {
+    transform: translateY(-2px);
+}
+
+/* ==================== PREMIUM LOGIN BUTTON ==================== */
+.premium-login-button {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine effect animation */
+.premium-login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.premium-login-button:hover::before {
+    left: 100%;
+}
+
+.premium-login-button:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* ==================== ERROR MESSAGE ANIMATIONS ==================== */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.error-message-box {
+    animation: slideDown 0.3s ease-out, shake 0.5s ease-in-out;
+}
+
+/* ==================== REGISTER CONTAINER ==================== */
+.register-container:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+/* ==================== MOBILE OPTIMIZATIONS ==================== */
+@media (max-width: 640px) {
+    .login-view-container {
+        padding: 16px;
+    }
+
+    .login-card-responsive {
+        padding: 24px !important;
+        border-radius: 16px !important;
+    }
+
+    .premium-login-button {
+        min-height: 48px; /* Larger touch target on mobile */
+        font-size: 16px;
+    }
+
+    .premium-input-field {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* ==================== TABLET OPTIMIZATIONS ==================== */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .login-card-responsive {
+        max-width: 420px;
+        padding: 36px !important;
+    }
+}
+
+/* ==================== DESKTOP OPTIMIZATIONS ==================== */
+@media (min-width: 1025px) {
+    .login-card-responsive {
+        max-width: 450px;
+        padding: 48px !important;
+    }
+
+    /* Add subtle parallax effect */
+    .login-view-container {
+        background-attachment: fixed;
+    }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==================== SMOOTH SCROLLING ==================== */
+.login-view-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==================== LOADING STATE ==================== */
+.premium-login-button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
