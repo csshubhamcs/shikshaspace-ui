@@ -73,21 +73,13 @@ vaadin {
 spotless {
     java {
         googleJavaFormat('1.17.0')
-        target 'src/**/*.java'
         targetExclude 'frontend/generated/**/*.java', 'build/**/*.java', '**/generated/**/*.java'
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
     }
-
-    format 'misc', {
-        target '*.gradle', '*.md', '.gitignore'
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
 }
 
-// Fix task dependency ordering - add this at the end
 tasks.named('spotlessJava').configure {
     mustRunAfter tasks.named('vaadinPrepareFrontend')
 }
