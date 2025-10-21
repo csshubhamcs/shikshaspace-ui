@@ -352,8 +352,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
   }
 
   private void handleGoogleLogin() {
-    // Use Spring Security OAuth2 endpoint
-    String oauth2Url = "/oauth2/authorization/keycloak";
+    // ✅ Direct to Google, skip Keycloak login page
+    String oauth2Url = "/oauth2/authorization/keycloak?kc_idp_hint=google";
     getUI().ifPresent(ui -> ui.getPage().setLocation(oauth2Url));
   }
 

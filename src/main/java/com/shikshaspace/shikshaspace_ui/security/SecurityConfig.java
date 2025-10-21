@@ -21,32 +21,29 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    // Headers
+    // ✅ 1. Headers FIRST
     http.headers(
         headers ->
             headers
                 .cacheControl(cache -> cache.disable())
                 .frameOptions(frame -> frame.sameOrigin()));
 
-    // Public resources
-    http.authorizeHttpRequests(
-        auth -> auth.requestMatchers("/images/**", "/icons/**", "/public/**").permitAll());
-
-    // ✅ Vaadin Security with OAuth2
+    // ✅ 2. Vaadin Security BEFORE authorizeHttpRequests
     http.with(
         VaadinSecurityConfigurer.vaadin(),
         configurer -> {
-          configurer.oauth2LoginPage("/oauth2/authorization/keycloak");
+          configurer.loginView("/login");
         });
 
-    // OAuth2 login with success handler
-    http.oauth2Login(
-        oauth2 ->
-            oauth2
-                .successHandler(oAuth2SuccessHandler)
-                .defaultSuccessUrl("/home", true)); // ✅ Changed to /home
+    //        // ✅ 3. OAuth2 login (manual trigger from button)
+    //        http.oauth2Login(oauth2 -> oauth2
+    //                .loginPage("/login")
+    //                .successHandler(oAuth2SuccessHandler)
+    //                .defaultSuccessUrl("/home", true));
 
-    // Logout
+    http.oauth2Login(oauth2 -> oauth2.loginPage("/login").defaultSuccessUrl("/home", true));
+
+    // ✅ 4. Logout
     http.logout(
         logout ->
             logout

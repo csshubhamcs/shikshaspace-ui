@@ -44,26 +44,26 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
 
     log.debug("Navigation attempt to: {}", route);
 
-    // ✅ Handle root route for authenticated users
-    if ((route == null || route.isEmpty() || route.equals("/")) && SecurityUtils.isUserLoggedIn()) {
-      log.debug("Authenticated user at root, redirecting to home");
-      event.forwardTo("home");
+    // Handle root route
+    if (route == null || route.isEmpty() || route.equals("/")) {
+      if (SecurityUtils.isUserLoggedIn()) {
+        event.forwardTo("home");
+      } else {
+        event.rerouteTo(LoginView.class);
+      }
       return;
     }
 
     // Allow public routes
     if (isPublicRoute(route)) {
-      log.debug("Public route, allowing access: {}", route);
+      log.debug("Public route: {}", route);
       return;
     }
 
-    // Check if user is authenticated
+    // Check authentication for protected routes
     if (!SecurityUtils.isUserLoggedIn()) {
-      log.warn("Unauthorized access attempt to: {}", route);
+      log.warn("Unauthorized access: {}", route);
       event.rerouteTo(LoginView.class);
-      log.info("Redirected to login page");
-    } else {
-      log.debug("Authenticated user accessing: {}", route);
     }
   }
 
