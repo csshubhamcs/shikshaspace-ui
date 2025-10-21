@@ -10,7 +10,11 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -119,6 +123,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         usernameField,
         passwordField,
         loginButton,
+        createDivider(),
+        createGoogleLoginButton(),
         registerContainer);
 
     return loginCard;
@@ -292,6 +298,69 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     button.addClickListener(event -> handleLogin());
     return button;
+  }
+
+  private Div createDivider() {
+    Div dividerContainer = new Div();
+    dividerContainer
+        .getStyle()
+        .set("display", "flex")
+        .set("align-items", "center")
+        .set("margin", "clamp(16px, 3vw, 20px) 0")
+        .set("color", "#999");
+
+    Hr leftLine = new Hr();
+    leftLine.getStyle().set("flex", "1").set("border-color", "#e0e0e0");
+
+    Span orText = new Span("OR");
+    orText
+        .getStyle()
+        .set("margin", "0 15px")
+        .set("font-size", "clamp(12px, 2.5vw, 14px)")
+        .set("font-weight", "500");
+
+    Hr rightLine = new Hr();
+    rightLine.getStyle().set("flex", "1").set("border-color", "#e0e0e0");
+
+    dividerContainer.add(leftLine, orText, rightLine);
+    return dividerContainer;
+  }
+
+  private Button createGoogleLoginButton() {
+    Button googleBtn = new Button("Sign in with Google");
+    googleBtn.setWidthFull();
+    googleBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+    googleBtn.addClassName("google-login-button");
+
+    // Google icon
+    Icon googleIcon = VaadinIcon.GLOBE.create();
+    googleBtn.setIcon(googleIcon);
+
+    googleBtn
+        .getStyle()
+        .set("margin-top", "0")
+        .set("border", "2px solid #4285f4")
+        .set("color", "#4285f4")
+        .set("border-radius", "10px")
+        .set("font-weight", "600")
+        .set("min-height", "44px")
+        .set("transition", "all 0.3s ease");
+
+    googleBtn.addClickListener(e -> handleGoogleLogin());
+
+    return googleBtn;
+  }
+
+  private void handleGoogleLogin() {
+    String keycloakUrl =
+        "https://keycloak.shubhamsinghrajput.com/realms/shikshaspace/protocol/openid-connect/auth"
+            + "?client_id=shikshaspace-ui-client"
+            + "&redirect_uri=https://shubhamsinghrajput.com"
+            + "&response_type=code"
+            + "&scope=openid%20profile%20email"
+            + "&kc_idp_hint=google";
+
+    getUI().ifPresent(ui -> ui.getPage().setLocation(keycloakUrl));
   }
 
   /** Create register container (no border) */

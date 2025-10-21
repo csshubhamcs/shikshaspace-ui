@@ -7,5 +7,7 @@ import '@vaadin/password-field/theme/lumo/vaadin-password-field.js';
 import '@vaadin/button/theme/lumo/vaadin-button.js';
 import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
 import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
+import '@vaadin/icons/vaadin-iconset.js';
+import '@vaadin/icon/theme/lumo/vaadin-icon.js';
 import '@vaadin/notification/theme/lumo/vaadin-notification.js';
 import 'Frontend/generated/jar-resources/flow-component-renderer.js';
