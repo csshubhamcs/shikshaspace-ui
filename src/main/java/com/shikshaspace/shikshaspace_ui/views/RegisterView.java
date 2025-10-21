@@ -554,8 +554,9 @@ public class RegisterView extends VerticalLayout {
         // ✅ FIX: Show notification with explicit open()
         showSuccessNotification("Account created! Welcome, " + response.getUsername() + "!");
 
-        // ✅ FIX: Navigate to "home" instead of empty string
-        UI.getCurrent().navigate("home");
+        UI.getCurrent()
+            .getPage()
+            .executeJs("setTimeout(function() { window.location.href = '/home'; }, 100);");
 
       } else {
         throw new RuntimeException("Invalid response from server");
@@ -630,15 +631,9 @@ public class RegisterView extends VerticalLayout {
   }
 
   private void handleGoogleSignup() {
-    String keycloakUrl =
-        "https://keycloak.shubhamsinghrajput.com/realms/shikshaspace/protocol/openid-connect/auth"
-            + "?client_id=shikshaspace-ui-client"
-            + "&redirect_uri=https://shubhamsinghrajput.com"
-            + "&response_type=code"
-            + "&scope=openid%20profile%20email"
-            + "&kc_idp_hint=google";
-
-    getUI().ifPresent(ui -> ui.getPage().setLocation(keycloakUrl));
+    // Use Spring Security OAuth2 endpoint
+    String oauth2Url = "/oauth2/authorization/keycloak";
+    getUI().ifPresent(ui -> ui.getPage().setLocation(oauth2Url));
   }
 
   /** Show error message with animation */

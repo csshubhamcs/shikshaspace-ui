@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 /** HomePage - Both root ("") and "home" routes */
-@Route(value = "", layout = MainLayout.class) // ✅ FIX: Root route
+@Route(value = "home", layout = MainLayout.class)
 @PageTitle("Home - ShikshaSpace")
 @PermitAll
 public class HomePage extends VerticalLayout {

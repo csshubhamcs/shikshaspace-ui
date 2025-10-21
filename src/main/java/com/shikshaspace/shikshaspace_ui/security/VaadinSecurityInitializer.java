@@ -25,9 +25,7 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
 
   /** Public routes that don't require authentication Add new public routes here */
   private static final List<String> PUBLIC_ROUTES =
-      List.of(
-          "login", "register" // ✅ FIXED: register not registration
-          );
+      List.of("login", "register", "oauth2", "login/oauth2");
 
   @Override
   public void serviceInit(ServiceInitEvent event) {
@@ -41,14 +39,19 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
             });
   }
 
-  /** Intercepts EVERY route navigation Checks authentication and redirects if necessary */
   private void authenticateNavigation(BeforeEnterEvent event) {
-    // Get the route the user is trying to access
     String route = event.getLocation().getPath();
 
     log.debug("Navigation attempt to: {}", route);
 
-    // Check if route is public (no auth required)
+    // ✅ Handle root route for authenticated users
+    if ((route == null || route.isEmpty() || route.equals("/")) && SecurityUtils.isUserLoggedIn()) {
+      log.debug("Authenticated user at root, redirecting to home");
+      event.forwardTo("home");
+      return;
+    }
+
+    // Allow public routes
     if (isPublicRoute(route)) {
       log.debug("Public route, allowing access: {}", route);
       return;
@@ -57,10 +60,7 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
     // Check if user is authenticated
     if (!SecurityUtils.isUserLoggedIn()) {
       log.warn("Unauthorized access attempt to: {}", route);
-
-      // Redirect to login
       event.rerouteTo(LoginView.class);
-
       log.info("Redirected to login page");
     } else {
       log.debug("Authenticated user accessing: {}", route);

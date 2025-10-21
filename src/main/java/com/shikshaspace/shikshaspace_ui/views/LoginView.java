@@ -352,15 +352,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
   }
 
   private void handleGoogleLogin() {
-    String keycloakUrl =
-        "https://keycloak.shubhamsinghrajput.com/realms/shikshaspace/protocol/openid-connect/auth"
-            + "?client_id=shikshaspace-ui-client"
-            + "&redirect_uri=https://shubhamsinghrajput.com"
-            + "&response_type=code"
-            + "&scope=openid%20profile%20email"
-            + "&kc_idp_hint=google";
-
-    getUI().ifPresent(ui -> ui.getPage().setLocation(keycloakUrl));
+    // Use Spring Security OAuth2 endpoint
+    String oauth2Url = "/oauth2/authorization/keycloak";
+    getUI().ifPresent(ui -> ui.getPage().setLocation(oauth2Url));
   }
 
   /** Create register container (no border) */
@@ -444,7 +438,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         // ✅ FIX: Navigate after short delay to ensure notification shows
         UI.getCurrent()
             .getPage()
-            .executeJs("setTimeout(function() { window.location.href = '/'; }, 100);");
+            .executeJs("setTimeout(function() { window.location.href = '/home'; }, 100);");
 
       } else {
         throw new RuntimeException("Invalid response from server");

@@ -2,6 +2,7 @@ package com.shikshaspace.shikshaspace_ui.security;
 
 import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -9,44 +10,43 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Production-grade Security Configuration - Session-based authentication (fast, no repeated server
- * calls) - Cache disabled for authenticated pages (prevents back button issues) - Persistent
- * sessions across tabs - Proper logout cleanup
- *
- * @author ShikshaSpace Engineering Team
- * @version 2.0 (Production-Grade with Centralized Auth)
- */
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 @Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
 public class SecurityConfig {
+
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    // ✅ FIXED: Disable cache for authenticated pages (prevents back button showing old pages)
+    // Headers
     http.headers(
         headers ->
             headers
                 .cacheControl(cache -> cache.disable())
                 .frameOptions(frame -> frame.sameOrigin()));
 
-    // Public static resources
+    // Public resources
     http.authorizeHttpRequests(
         auth -> auth.requestMatchers("/images/**", "/icons/**", "/public/**").permitAll());
 
-    // ✅ Vaadin security handles session automatically
+    // ✅ Vaadin Security with OAuth2
     http.with(
         VaadinSecurityConfigurer.vaadin(),
         configurer -> {
-          configurer.loginView("/login");
+          configurer.oauth2LoginPage("/oauth2/authorization/keycloak");
         });
 
-    // OAuth2 login (if using Keycloak - optional)
-    http.oauth2Login(oauth2 -> oauth2.loginPage("/login").defaultSuccessUrl("/", true));
+    // OAuth2 login with success handler
+    http.oauth2Login(
+        oauth2 ->
+            oauth2
+                .successHandler(oAuth2SuccessHandler)
+                .defaultSuccessUrl("/home", true)); // ✅ Changed to /home
 
-    // ✅ Proper logout with session cleanup
+    // Logout
     http.logout(
         logout ->
             logout

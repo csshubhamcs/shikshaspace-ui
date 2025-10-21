@@ -2,24 +2,15 @@ import { injectGlobalWebcomponentCss } from 'Frontend/generated/jar-resources/th
 
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
 import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
-import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
-import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
-import '@vaadin/button/theme/lumo/vaadin-button.js';
+import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
 import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
+import '@vaadin/password-field/theme/lumo/vaadin-password-field.js';
+import '@vaadin/button/theme/lumo/vaadin-button.js';
 import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
-import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
-import 'Frontend/generated/jar-resources/menubarConnector.js';
-import '@vaadin/menu-bar/theme/lumo/vaadin-menu-bar.js';
-import '@vaadin/context-menu/theme/lumo/vaadin-context-menu.js';
-import 'Frontend/generated/jar-resources/flow-component-renderer.js';
-import 'Frontend/generated/jar-resources/contextMenuConnector.js';
-import 'Frontend/generated/jar-resources/contextMenuTargetConnector.js';
-import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
 import '@vaadin/icons/vaadin-iconset.js';
 import '@vaadin/icon/theme/lumo/vaadin-icon.js';
-import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
-import '@vaadin/password-field/theme/lumo/vaadin-password-field.js';
 import '@vaadin/notification/theme/lumo/vaadin-notification.js';
+import 'Frontend/generated/jar-resources/flow-component-renderer.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';
@@ -36,6 +27,9 @@ const loadOnDemand = (key) => {
     pending.push(import('./chunks/chunk-c4ab35363bafc50f5a2ba3e1d9483b4b2707b3ece87da33db34247718be3b621.js'));
   }
   if (key === 'cc59621c5d2431a0883dd9844295b25ad74bf2ee42da80273ab7cea6148fb08b') {
+    pending.push(import('./chunks/chunk-6f5d53304429630134f1264ef749ee3dddcf1d76baba2e8c9219e95fdf4a19f1.js'));
+  }
+  if (key === '94d14820ea6f1274610bbd5ce6422cbb7cffd689303133414ff95e00c4163737') {
     pending.push(import('./chunks/chunk-6f5d53304429630134f1264ef749ee3dddcf1d76baba2e8c9219e95fdf4a19f1.js'));
   }
   if (key === 'b8090334c38146b0b8bc46ef33ecdbcbdffd5b46bd172dd9015ddd39c2497bf5') {
