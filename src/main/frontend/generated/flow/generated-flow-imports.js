@@ -18,7 +18,6 @@ import '@vaadin/icon/theme/lumo/vaadin-icon.js';
 import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
 import '@vaadin/password-field/theme/lumo/vaadin-password-field.js';
 import '@vaadin/notification/theme/lumo/vaadin-notification.js';
-import 'Frontend/google-signin.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/color-global.js';
 import '@vaadin/vaadin-lumo-styles/typography-global.js';
@@ -40,7 +39,7 @@ const loadOnDemand = (key) => {
     pending.push(import('./chunks/chunk-6f5d53304429630134f1264ef749ee3dddcf1d76baba2e8c9219e95fdf4a19f1.js'));
   }
   if (key === 'f68cc5759feaf39be7ecb21e5d866b6d9597c70b1f3b36570793189c51931b64') {
-    pending.push(import('./chunks/chunk-6dc65e4d50969f5732005c6568e3d5cf9d4bd9f15a74474abf4d398ff08c16fc.js'));
+    pending.push(import('./chunks/chunk-81690342d87400b3c7414607370249cc9e907acfa5a7354f143913d8cddea934.js'));
   }
   return Promise.all(pending);
 }
