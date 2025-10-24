@@ -1,8 +1,6 @@
 package com.shikshaspace.shikshaspace_ui.components;
 
 import com.shikshaspace.shikshaspace_ui.security.SecurityUtils;
-import com.shikshaspace.shikshaspace_ui.views.AboutView;
-import com.shikshaspace.shikshaspace_ui.views.ExploreView;
 import com.shikshaspace.shikshaspace_ui.views.HomePage;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -20,334 +18,147 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 
 /**
- * Production-grade responsive MainLayout with modern premium design Supports mobile (320px+),
- * tablet (768px+), and desktop (1024px+)
- *
- * @author ShikshaSpace Engineering Team
- * @version 2.0 (Responsive + Premium UI)
+ * Production-grade responsive main layout. Provides navigation drawer and top header with user
+ * profile menu.
  */
 public class MainLayout extends AppLayout {
 
-  private static final String MOBILE_BREAKPOINT = "768px";
-  private static final String TABLET_BREAKPOINT = "1024px";
-
   public MainLayout() {
-    // Enable responsive drawer overlay behavior
-    setPrimarySection(Section.DRAWER);
-
-    createResponsiveHeader();
-    createResponsiveDrawer();
-
-    // Add responsive CSS classes
+    createHeader();
+    createDrawer();
     addClassName("responsive-main-layout");
-
-    // Configure drawer for mobile overlay
-    getElement().getStyle().set("--vaadin-app-layout-drawer-overlay", "true");
   }
 
-  private void createResponsiveHeader() {
-    // Hamburger menu toggle (visible on all devices)
+  /** Create responsive header with logo and profile menu. */
+  private void createHeader() {
     DrawerToggle toggle = new DrawerToggle();
-    toggle.addClassName("drawer-toggle");
     toggle.getStyle().set("color", "white").set("cursor", "pointer");
     toggle.setAriaLabel("Toggle navigation menu");
 
-    // Logo/Title with fluid typography
     H1 logo = new H1("ShikshaSpace");
-    logo.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE, "header-logo");
+    logo.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
     logo.getStyle()
         .set("color", "white")
         .set("font-weight", "600")
         .set("font-size", "clamp(1.2rem, 4vw, 1.75rem)")
-        .set("letter-spacing", "0.5px")
-        .set("text-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-        .set("cursor", "default");
+        .set("letter-spacing", "0.5px");
 
-    // ✅ Navigation links (About & Explore)
-    HorizontalLayout navLinks = createNavigationLinks();
+    MenuBar profileMenu = createProfileMenu();
 
-    // Profile menu
-    MenuBar profileMenu = createResponsiveProfileMenu();
-    profileMenu.addClassName("profile-menu-responsive");
-
-    // Header layout
-    HorizontalLayout header = new HorizontalLayout(toggle, logo, navLinks, profileMenu);
+    HorizontalLayout header = new HorizontalLayout(toggle, logo, profileMenu);
     header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+    header.expand(logo);
     header.setWidthFull();
-    header.addClassNames(
-        Padding.Vertical.SMALL, Padding.Horizontal.MEDIUM, Gap.MEDIUM, "responsive-header");
-
-    // Modern gradient with glassmorphism effect
+    header.addClassNames(LumoUtility.Padding.Vertical.SMALL, LumoUtility.Padding.Horizontal.MEDIUM);
     header
         .getStyle()
         .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-        .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(102, 126, 234, 0.15)")
-        .set("backdrop-filter", "blur(10px)")
-        .set("position", "sticky")
-        .set("top", "0")
-        .set("z-index", "1000")
-        .set("padding", "clamp(8px, 2vw, 16px)");
+        .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
 
     addToNavbar(header);
   }
 
-  /**
-   * ✅ NEW METHOD: Create navigation links (About & Explore) Hidden on mobile, visible on tablet and
-   * desktop
-   */
-  private HorizontalLayout createNavigationLinks() {
-    HorizontalLayout navLinks = new HorizontalLayout();
-    navLinks.setSpacing(true);
-    navLinks.setAlignItems(FlexComponent.Alignment.CENTER);
-    navLinks.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-    navLinks.addClassName("header-nav-links");
-
-    navLinks
-        .getStyle()
-        .set("gap", "24px")
-        .set("flex-grow", "1") // ✅ Take remaining space to center
-        .set("display", "none") // Hidden on mobile by default
-        .set("cursor", "default"); // ✅ Remove pointer cursor
-
-    // RouterLink takes (String text, Class navigationTarget)
-    RouterLink aboutLink = new RouterLink("About", AboutView.class);
-    aboutLink.addClassName("header-link");
-    aboutLink
-        .getStyle()
-        .set("color", "white")
-        .set("text-decoration", "none")
-        .set("font-weight", "500")
-        .set("font-size", "16px")
-        .set("padding", "8px 16px")
-        .set("border-radius", "6px")
-        .set("transition", "all 0.2s ease")
-        .set("cursor", "pointer");
-
-    RouterLink exploreLink = new RouterLink("Explore", ExploreView.class);
-    exploreLink.addClassName("header-link");
-    exploreLink
-        .getStyle()
-        .set("color", "white")
-        .set("text-decoration", "none")
-        .set("font-weight", "500")
-        .set("font-size", "16px")
-        .set("padding", "8px 16px")
-        .set("border-radius", "6px")
-        .set("transition", "all 0.2s ease")
-        .set("cursor", "pointer");
-
-    // Add hover effects
-    addLinkHoverEffect(aboutLink);
-    addLinkHoverEffect(exploreLink);
-
-    navLinks.add(aboutLink, exploreLink);
-
-    // Show on tablet and above (768px+)
-    navLinks
-        .getElement()
-        .executeJs(
-            "const navLinks = this;"
-                + "function updateNavVisibility() {"
-                + "  if (window.innerWidth >= 768) {"
-                + "    navLinks.style.display = 'flex';"
-                + "  } else {"
-                + "    navLinks.style.display = 'none';"
-                + "  }"
-                + "}"
-                + "updateNavVisibility();"
-                + "window.addEventListener('resize', updateNavVisibility);");
-
-    return navLinks;
-  }
-
-  /** Create responsive profile dropdown menu Hides username label on mobile devices */
-  private MenuBar createResponsiveProfileMenu() {
+  /** Create profile dropdown menu with user info and actions. */
+  private MenuBar createProfileMenu() {
     MenuBar menuBar = new MenuBar();
     menuBar.setOpenOnHover(false);
-    menuBar.addClassName("profile-menu-bar");
     menuBar.getStyle().set("background", "transparent").set("color", "white");
 
-    // Get current user info from SecurityUtils
     String username = SecurityUtils.getUsername();
     String email = SecurityUtils.getEmail();
 
-    // User avatar with responsive sizing
     Avatar avatar = new Avatar(username != null ? username : "User");
-    avatar.addClassName("user-avatar");
-    avatar
-        .getStyle()
-        .set("--vaadin-avatar-size", "var(--lumo-size-m)")
-        .set("background", "white")
-        .set("color", "#667eea")
-        .set("cursor", "pointer")
-        .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+    avatar.getStyle().set("background", "white").set("color", "#667eea").set("cursor", "pointer");
 
-    // Username label - hidden on mobile via CSS
     Span usernameLabel = new Span(username != null ? username : "User");
-    usernameLabel.addClassNames(LumoUtility.Display.Breakpoint.Small.HIDDEN, "username-label");
+    usernameLabel.addClassName("username-label");
     usernameLabel
         .getStyle()
         .set("color", "white")
         .set("margin-left", "10px")
-        .set("font-weight", "500")
-        .set("font-size", "14px");
+        .set("font-weight", "500");
 
-    // Create profile menu item with avatar and username
     HorizontalLayout profileItem = new HorizontalLayout(avatar, usernameLabel);
     profileItem.setAlignItems(FlexComponent.Alignment.CENTER);
     profileItem.setSpacing(false);
-    profileItem.addClassName("profile-menu-item");
 
     MenuItem menuItem = menuBar.addItem(profileItem);
     SubMenu subMenu = menuItem.getSubMenu();
 
-    // User info header in dropdown with modern styling
+    // User info header
     VerticalLayout userInfo = new VerticalLayout();
     userInfo.setPadding(true);
     userInfo.setSpacing(false);
-    userInfo.addClassName("user-info-header");
-    userInfo
-        .getStyle()
-        .set("background", "linear-gradient(145deg, #f8f9ff, #ffffff)")
-        .set("border-radius", "8px")
-        .set("margin-bottom", "8px");
 
     Span nameSpan = new Span(username != null ? username : "User");
-    nameSpan.getStyle().set("font-weight", "600").set("font-size", "15px").set("color", "#333");
+    nameSpan.getStyle().set("font-weight", "600").set("font-size", "15px");
 
     Span emailSpan = new Span(email != null ? email : "");
-    emailSpan
-        .getStyle()
-        .set("font-size", "12px")
-        .set("color", "var(--lumo-secondary-text-color)")
-        .set("margin-top", "4px");
+    emailSpan.getStyle().set("font-size", "12px").set("color", "var(--lumo-secondary-text-color)");
 
     userInfo.add(nameSpan, emailSpan);
     subMenu.addItem(userInfo).setEnabled(false);
+    subMenu.add(new Hr());
 
-    // Modern divider
-    Hr divider = new Hr();
-    divider
-        .getStyle()
-        .set("margin", "8px 0")
-        .set("border", "none")
-        .set("border-top", "1px solid var(--lumo-contrast-10pct)");
-    subMenu.add(divider);
-
-    // Edit Profile menu item with icon
+    // Profile link
     MenuItem editProfile = subMenu.addItem(createMenuItemContent(VaadinIcon.USER, "Edit Profile"));
-    editProfile.addClassName("profile-menu-option");
     editProfile.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("profile")));
-    styleMenuItem(editProfile);
 
-    // Logout menu item with icon
+    // Logout link
     MenuItem logout = subMenu.addItem(createMenuItemContent(VaadinIcon.SIGN_OUT, "Logout"));
-    logout.addClassName("profile-menu-option");
     logout.addClickListener(
         e -> {
           SecurityUtils.logout();
-          getElement().executeJs("window.location.replace('/login');");
+          getUI().ifPresent(ui -> ui.navigate("login"));
         });
-    styleMenuItem(logout);
 
     return menuBar;
   }
 
-  /** Style individual menu items with hover effects */
-  private void styleMenuItem(MenuItem item) {
-    item.getElement()
-        .getStyle()
-        .set("padding", "10px 16px")
-        .set("cursor", "pointer")
-        .set("transition", "all 0.2s ease")
-        .set("border-radius", "6px");
-  }
-
-  /** Helper to create menu item with icon and text Used for profile dropdown options */
+  /** Helper to create menu item with icon and text. */
   private HorizontalLayout createMenuItemContent(VaadinIcon iconType, String text) {
     Icon icon = iconType.create();
-    icon.getStyle()
-        .set("color", "var(--lumo-secondary-text-color)")
-        .set("width", "18px")
-        .set("height", "18px");
+    icon.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
     Span label = new Span(text);
-    label.getStyle().set("margin-left", "12px").set("font-size", "14px").set("font-weight", "500");
+    label.getStyle().set("margin-left", "10px");
 
     HorizontalLayout layout = new HorizontalLayout(icon, label);
     layout.setAlignItems(FlexComponent.Alignment.CENTER);
     layout.setSpacing(false);
-    layout.getStyle().set("width", "100%");
-
     return layout;
   }
 
-  /**
-   * Create responsive navigation drawer (sidebar) Overlay on mobile, permanent sidebar on desktop
-   */
-  private void createResponsiveDrawer() {
+  /** Create navigation drawer with menu items. */
+  private void createDrawer() {
     VerticalLayout drawerContent = new VerticalLayout();
     drawerContent.setSizeFull();
     drawerContent.setPadding(true);
     drawerContent.setSpacing(true);
-    drawerContent.addClassName("drawer-content");
-    drawerContent
-        .getStyle()
-        .set("background", "linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)")
-        .set("padding", "clamp(12px, 3vw, 20px)"); // Responsive padding
 
-    // Navigation links with modern styling
-    RouterLink homeLink = createResponsiveNavLink(VaadinIcon.HOME, "Home", HomePage.class);
+    RouterLink homeLink = createNavLink(VaadinIcon.HOME, "Home", HomePage.class);
+    RouterLink profileLink = createNavLink(VaadinIcon.USER, "Profile", "profile");
 
-    // Add more navigation items here in the future
-    RouterLink profileLink = createResponsiveNavLink(VaadinIcon.USER, "Profile", "profile");
-
-    // Placeholder for future navigation with modern styling
-    Span placeholder = new Span("More features coming soon...");
-    placeholder.addClassName("drawer-placeholder");
-    placeholder
-        .getStyle()
-        .set("color", "var(--lumo-secondary-text-color)")
-        .set("font-size", "12px")
-        .set("margin-top", "auto")
-        .set("padding", "16px 12px")
-        .set("font-style", "italic")
-        .set("text-align", "center")
-        .set("background", "linear-gradient(145deg, #ffffff, #f8f9ff)")
-        .set("border-radius", "8px")
-        .set("border", "1px dashed var(--lumo-contrast-20pct)");
-
-    drawerContent.add(homeLink, profileLink, placeholder);
-
+    drawerContent.add(homeLink, profileLink);
     addToDrawer(drawerContent);
   }
 
-  /**
-   * Helper to create responsive navigation link with modern premium design Supports both Class<?
-   * extends Component> and String routes
-   */
-  private RouterLink createResponsiveNavLink(
+  /** Create navigation link with icon and label. */
+  private RouterLink createNavLink(
       VaadinIcon iconType,
       String text,
       Class<? extends com.vaadin.flow.component.Component> routeClass) {
     Icon icon = iconType.create();
-    icon.addClassName("nav-icon");
-    icon.getStyle().set("width", "20px").set("height", "20px").set("flex-shrink", "0");
+    icon.getStyle().set("width", "20px").set("height", "20px");
 
     Span label = new Span(text);
-    label.addClassName("nav-label");
-    label.getStyle().set("font-size", "14px").set("font-weight", "500").set("flex-grow", "1");
 
     RouterLink link = new RouterLink();
     link.add(icon, label);
     link.setRoute(routeClass);
     link.addClassName("responsive-nav-link");
-
-    // Modern premium styling with hover effects
     link.getStyle()
         .set("display", "flex")
         .set("align-items", "center")
@@ -356,30 +167,23 @@ public class MainLayout extends AppLayout {
         .set("border-radius", "10px")
         .set("text-decoration", "none")
         .set("color", "var(--lumo-body-text-color)")
-        .set("transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)")
-        .set("background", "transparent")
-        .set("margin-bottom", "6px")
-        .set("position", "relative");
+        .set("transition", "all 0.3s ease");
 
     return link;
   }
 
-  /** Overloaded method for String route navigation */
-  private RouterLink createResponsiveNavLink(VaadinIcon iconType, String text, String route) {
+  /** Overloaded method for String route navigation. */
+  private RouterLink createNavLink(VaadinIcon iconType, String text, String route) {
     Icon icon = iconType.create();
-    icon.addClassName("nav-icon");
-    icon.getStyle().set("width", "20px").set("height", "20px").set("flex-shrink", "0");
+    icon.getStyle().set("width", "20px").set("height", "20px");
 
     Span label = new Span(text);
-    label.addClassName("nav-label");
-    label.getStyle().set("font-size", "14px").set("font-weight", "500").set("flex-grow", "1");
 
-    RouterLink link = new RouterLink(text, HomePage.class); // Fallback
+    RouterLink link = new RouterLink(text, HomePage.class);
     link.getElement().setAttribute("href", route);
     link.removeAll();
     link.add(icon, label);
     link.addClassName("responsive-nav-link");
-
     link.getStyle()
         .set("display", "flex")
         .set("align-items", "center")
@@ -388,22 +192,8 @@ public class MainLayout extends AppLayout {
         .set("border-radius", "10px")
         .set("text-decoration", "none")
         .set("color", "var(--lumo-body-text-color)")
-        .set("transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)")
-        .set("background", "transparent")
-        .set("margin-bottom", "6px");
+        .set("transition", "all 0.3s ease");
 
     return link;
-  }
-
-  /** ✅ NEW METHOD: Add hover effect to header links */
-  private void addLinkHoverEffect(RouterLink link) {
-    link.getElement()
-        .executeJs(
-            "this.addEventListener('mouseenter', () => {"
-                + "  this.style.background = 'rgba(255, 255, 255, 0.15)';"
-                + "});"
-                + "this.addEventListener('mouseleave', () => {"
-                + "  this.style.background = 'transparent';"
-                + "});");
   }
 }

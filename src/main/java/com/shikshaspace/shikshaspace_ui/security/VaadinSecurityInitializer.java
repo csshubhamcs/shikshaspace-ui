@@ -1,7 +1,6 @@
 package com.shikshaspace.shikshaspace_ui.security;
 
 import com.shikshaspace.shikshaspace_ui.views.LoginView;
-// ✅ FIXED: RegisterView not RegistrationView
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
@@ -10,20 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Production-grade centralized authentication guard Intercepts ALL route navigations and enforces
- * authentication
- *
- * <p>Benefits: - Single place for authentication logic - No code duplication in views - Automatic
- * protection for new views - Easy to maintain and test
- *
- * @author ShikshaSpace Engineering Team
- * @version 1.0 (Production-Grade)
+ * Production-grade centralized authentication guard. Intercepts ALL route navigations and enforces
+ * authentication.
  */
 @Slf4j
 @Component
 public class VaadinSecurityInitializer implements VaadinServiceInitListener {
 
-  /** Public routes that don't require authentication Add new public routes here */
+  /** Public routes that don't require authentication */
   private static final List<String> PUBLIC_ROUTES =
       List.of("login", "register", "oauth2", "login/oauth2");
 
@@ -46,8 +39,8 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
 
     // Handle root route
     if (route == null || route.isEmpty() || route.equals("/")) {
-      if (SecurityUtils.isUserLoggedIn()) {
-        event.forwardTo("home");
+      if (SecurityUtils.isAuthenticated()) { // ✅ FIXED: Changed from isUserLoggedIn()
+        return;
       } else {
         event.rerouteTo(LoginView.class);
       }
@@ -61,23 +54,20 @@ public class VaadinSecurityInitializer implements VaadinServiceInitListener {
     }
 
     // Check authentication for protected routes
-    if (!SecurityUtils.isUserLoggedIn()) {
+    if (!SecurityUtils.isAuthenticated()) { // ✅ FIXED: Changed from isUserLoggedIn()
       log.warn("Unauthorized access: {}", route);
       event.rerouteTo(LoginView.class);
     }
   }
 
-  /** Check if route is public (doesn't require authentication) */
+  /** Check if route is public */
   private boolean isPublicRoute(String route) {
     if (route == null || route.isEmpty()) {
-      // Root route "/" requires authentication
       return false;
     }
 
-    // Normalize route (remove leading/trailing slashes)
     String normalizedRoute = route.toLowerCase().replaceAll("^/+|/+$", "");
 
-    // Check if route matches any public route
     return PUBLIC_ROUTES.stream()
         .anyMatch(
             publicRoute ->

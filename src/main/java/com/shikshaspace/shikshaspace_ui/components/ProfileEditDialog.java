@@ -20,42 +20,33 @@ import java.util.function.Consumer;
 import lombok.Getter;
 
 /**
- * Production-grade responsive ProfileEditDialog with modern premium design Supports mobile
- * (320px+), tablet (768px+), and desktop (1024px+)
- *
- * <p>Features: - Mobile-first responsive design - Modern glassmorphism effects - Smooth animations
- * - Touch-friendly form fields - Fluid typography - Premium button styling
- *
- * @author ShikshaSpace Engineering Team
- * @version 2.0 (Responsive + Premium UI)
+ * Production-grade responsive ProfileEditDialog. Allows users to edit their profile information
+ * with validation.
  */
 public class ProfileEditDialog extends Dialog {
 
-  @Getter private final TextField firstNameField;
-  @Getter private final TextField lastNameField;
-  @Getter private final EmailField emailField;
-  @Getter private final IntegerField ageField;
-  @Getter private final TextField experienceField;
-  @Getter private final TextArea bioField;
-  @Getter private final TextField linkedinField;
-  @Getter private final TextField githubField;
-  @Getter private final TextField profileImageField;
-
+  // Removed 'final' - fields initialized in constructor
+  @Getter private TextField firstNameField;
+  @Getter private TextField lastNameField;
+  @Getter private EmailField emailField;
+  @Getter private IntegerField ageField;
+  @Getter private TextField experienceField;
+  @Getter private TextArea bioField;
+  @Getter private TextField linkedinField;
+  @Getter private TextField githubField;
+  @Getter private TextField profileImageField;
   private Button saveButton;
   private Button cancelButton;
 
   public ProfileEditDialog(UserResponse user, Consumer<UserResponse> onSave) {
-    // Dialog configuration with responsive width
+    // Dialog configuration
     setCloseOnEsc(true);
     setCloseOnOutsideClick(true);
     setModal(true);
     addClassName("profile-edit-dialog");
-
-    // Responsive dialog width
     setWidth("clamp(320px, 90vw, 650px)");
     setMaxHeight("90vh");
 
-    // Apply modern styling
     getElement()
         .getStyle()
         .set("border-radius", "clamp(12px, 2vw, 20px)")
@@ -70,31 +61,24 @@ public class ProfileEditDialog extends Dialog {
         .set("max-height", "85vh")
         .set("overflow-y", "auto");
 
-    // Header with gradient title and close button
+    // Header
     HorizontalLayout header = createHeader();
 
     // Form fields
     firstNameField = createTextField("First Name", user.getFirstName(), true);
     lastNameField = createTextField("Last Name", user.getLastName(), true);
-
     emailField = createEmailField(user.getEmail());
-
     ageField = createAgeField(user.getAge());
-
     experienceField = createExperienceField(user.getExperience());
-
     bioField = createBioField(user.getBio());
-
     linkedinField =
         createUrlField("LinkedIn URL", user.getLinkedinUrl(), "https://linkedin.com/in/username");
-
     githubField = createUrlField("GitHub URL", user.getGithubUrl(), "https://github.com/username");
-
     profileImageField =
         createUrlField(
             "Profile Image URL", user.getProfileImageUrl(), "https://example.com/image.jpg");
 
-    // Form layout with responsive columns
+    // Form layout
     FormLayout formLayout = new FormLayout();
     formLayout.addClassName("profile-form-layout");
     formLayout.add(
@@ -108,7 +92,7 @@ public class ProfileEditDialog extends Dialog {
         githubField,
         profileImageField);
 
-    // Responsive form steps
+    // Responsive columns
     formLayout.setResponsiveSteps(
         new FormLayout.ResponsiveStep("0", 1), // Mobile: 1 column
         new FormLayout.ResponsiveStep("500px", 2) // Desktop: 2 columns
@@ -120,14 +104,14 @@ public class ProfileEditDialog extends Dialog {
     formLayout.setColspan(githubField, 2);
     formLayout.setColspan(profileImageField, 2);
 
-    // Action buttons with modern design
+    // Action buttons
     HorizontalLayout buttons = createButtons(user, onSave);
 
     dialogContent.add(header, formLayout, buttons);
     add(dialogContent);
   }
 
-  /** Create header with gradient title and close button */
+  /** Create header with title and close button. */
   private HorizontalLayout createHeader() {
     HorizontalLayout header = new HorizontalLayout();
     header.setWidthFull();
@@ -140,17 +124,18 @@ public class ProfileEditDialog extends Dialog {
         .set("padding-bottom", "16px")
         .set("border-bottom", "2px solid rgba(102, 126, 234, 0.1)");
 
-    // ✅ FIX: Title with SOLID DARK COLOR (not gradient)
     H3 title = new H3("Edit Profile");
     title.addClassName("dialog-title");
     title
         .getStyle()
         .set("margin", "0")
-        .set("color", "#1a1a1a") // ✅ SOLID dark color (visible!)
+        .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
+        .set("-webkit-background-clip", "text")
+        .set("-webkit-text-fill-color", "transparent")
+        .set("background-clip", "text")
         .set("font-size", "clamp(1.3rem, 4vw, 1.75rem)")
         .set("font-weight", "700");
 
-    // Close button
     Button closeButton = new Button(VaadinIcon.CLOSE.create());
     closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
     closeButton.addClassName("dialog-close-button");
@@ -165,105 +150,12 @@ public class ProfileEditDialog extends Dialog {
     return header;
   }
 
-  /** Create standard text field with styling */
-  private TextField createTextField(String label, String value, boolean required) {
-    TextField field = new TextField(label);
-    field.setValue(value != null ? value : "");
-    field.setRequired(required);
-    field.setClearButtonVisible(true);
-    styleInputField(field);
-    return field;
-  }
-
-  /** Create email field */
-  private EmailField createEmailField(String email) {
-    EmailField field = new EmailField("Email");
-    field.setValue(email != null ? email : "");
-    field.setReadOnly(true);
-    field.setHelperText("Email cannot be changed");
-    styleInputField(field);
-
-    // Add lock icon for readonly field
-    field.setPrefixComponent(VaadinIcon.LOCK.create());
-
-    return field;
-  }
-
-  /** Create age field */
-  private IntegerField createAgeField(Integer age) {
-    IntegerField field = new IntegerField("Age");
-    field.setValue(age != null && age > 0 ? age : null);
-    field.setMin(0);
-    field.setMax(150);
-    field.setHelperText("Optional");
-    styleInputField(field);
-    return field;
-  }
-
-  /** Create experience field */
-  private TextField createExperienceField(Double experience) {
-    TextField field = new TextField("Experience (years)");
-    field.setValue(experience != null ? String.valueOf(experience) : "");
-    field.setPattern("[0-9]+(\\.[0-9]+)?");
-    field.setHelperText("e.g., 5 or 5.5 (optional)");
-    styleInputField(field);
-    return field;
-  }
-
-  /** Create bio field with character counter */
-  private TextArea createBioField(String bio) {
-    TextArea field = new TextArea("Bio");
-    field.setValue(bio != null ? bio : "");
-    field.setMaxLength(500);
-    field.setHelperText(field.getValue().length() + "/500");
-
-    // Update character count dynamically
-    field.addValueChangeListener(e -> field.setHelperText(e.getValue().length() + "/500"));
-
-    styleInputField(field);
-
-    // Additional styling for textarea
-    field.getStyle().set("min-height", "120px").set("resize", "vertical");
-
-    return field;
-  }
-
-  /** Create URL field */
-  private TextField createUrlField(String label, String value, String placeholder) {
-    TextField field = new TextField(label);
-    field.setValue(value != null ? value : "");
-    field.setPlaceholder(placeholder);
-    field.setClearButtonVisible(true);
-    field.setHelperText("Optional");
-    styleInputField(field);
-    return field;
-  }
-
-  /** Apply consistent styling to input fields */
-  private void styleInputField(com.vaadin.flow.component.Component field) {
-    field
-        .getElement()
-        .getStyle()
-        .set("--vaadin-input-field-border-radius", "10px")
-        .set("--vaadin-input-field-background", "linear-gradient(145deg, #ffffff, #f8f9ff)")
-        .set("--vaadin-input-field-border-width", "2px")
-        .set("--vaadin-input-field-border-color", "rgba(102, 126, 234, 0.1)")
-        .set("--vaadin-input-field-hover-highlight", "#667eea")
-        .set("--vaadin-input-field-focus-ring", "0 0 0 3px rgba(102, 126, 234, 0.15)")
-        .set("font-size", "clamp(14px, 2.5vw, 16px)")
-        .set("transition", "all 0.3s ease");
-
-    field.getElement().getClassList().add("premium-dialog-input");
-  }
-
-  /** Create action buttons */
+  /** Create action buttons. */
   private HorizontalLayout createButtons(UserResponse user, Consumer<UserResponse> onSave) {
-    // Save button with premium styling
     saveButton = new Button("Save Changes");
     saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
     saveButton.setIcon(VaadinIcon.CHECK.create());
     saveButton.addClassName("premium-save-button");
-
     saveButton
         .getStyle()
         .set("border-radius", "10px")
@@ -275,33 +167,9 @@ public class ProfileEditDialog extends Dialog {
         .set("transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)")
         .set("cursor", "pointer");
 
-    // Hover effects
-    saveButton
-        .getElement()
-        .addEventListener(
-            "mouseenter",
-            e -> {
-              saveButton
-                  .getStyle()
-                  .set("transform", "translateY(-2px)")
-                  .set("box-shadow", "0 6px 16px rgba(102, 126, 234, 0.4)");
-            });
-
-    saveButton
-        .getElement()
-        .addEventListener(
-            "mouseleave",
-            e -> {
-              saveButton
-                  .getStyle()
-                  .set("transform", "translateY(0)")
-                  .set("box-shadow", "0 4px 12px rgba(102, 126, 234, 0.3)");
-            });
-
     saveButton.addClickListener(
         e -> {
           if (validateFields()) {
-            // Build updated user object
             UserResponse updated = new UserResponse();
             updated.setId(user.getId());
             updated.setUsername(user.getUsername());
@@ -329,11 +197,9 @@ public class ProfileEditDialog extends Dialog {
           }
         });
 
-    // Cancel button with modern styling
     cancelButton = new Button("Cancel");
     cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
     cancelButton.addClassName("premium-cancel-button");
-
     cancelButton
         .getStyle()
         .set("border-radius", "10px")
@@ -343,10 +209,8 @@ public class ProfileEditDialog extends Dialog {
         .set("transition", "all 0.3s ease")
         .set("cursor", "pointer")
         .set("border", "2px solid rgba(102, 126, 234, 0.2)");
-
     cancelButton.addClickListener(e -> close());
 
-    // Button layout
     HorizontalLayout buttons = new HorizontalLayout(cancelButton, saveButton);
     buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
     buttons.setWidthFull();
@@ -359,28 +223,90 @@ public class ProfileEditDialog extends Dialog {
         .set("gap", "clamp(12px, 2vw, 16px)")
         .set("flex-wrap", "wrap");
 
-    // On mobile, stack buttons
-    buttons
-        .getElement()
-        .executeJs("if (window.innerWidth < 500) { this.style.flexDirection = 'column-reverse'; }");
-
     return buttons;
   }
 
-  /** Validate form fields */
+  // Helper methods for creating fields
+  private TextField createTextField(String label, String value, boolean required) {
+    TextField field = new TextField(label);
+    field.setValue(value != null ? value : "");
+    field.setRequired(required);
+    field.setClearButtonVisible(true);
+    styleInputField(field);
+    return field;
+  }
+
+  private EmailField createEmailField(String email) {
+    EmailField field = new EmailField("Email");
+    field.setValue(email != null ? email : "");
+    field.setReadOnly(true);
+    field.setHelperText("Email cannot be changed");
+    styleInputField(field);
+    field.setPrefixComponent(VaadinIcon.LOCK.create());
+    return field;
+  }
+
+  private IntegerField createAgeField(Integer age) {
+    IntegerField field = new IntegerField("Age");
+    field.setValue(age != null && age > 0 ? age : null);
+    field.setMin(0);
+    field.setMax(150);
+    field.setHelperText("Optional");
+    styleInputField(field);
+    return field;
+  }
+
+  private TextField createExperienceField(Double experience) {
+    TextField field = new TextField("Experience (years)");
+    field.setValue(experience != null ? String.valueOf(experience) : "");
+    field.setPattern("[0-9]+(\\.[0-9]+)?");
+    field.setHelperText("e.g., 5 or 5.5 (optional)");
+    styleInputField(field);
+    return field;
+  }
+
+  private TextArea createBioField(String bio) {
+    TextArea field = new TextArea("Bio");
+    field.setValue(bio != null ? bio : "");
+    field.setMaxLength(500);
+    field.setHelperText(field.getValue().length() + " / 500");
+    field.addValueChangeListener(e -> field.setHelperText(e.getValue().length() + " / 500"));
+    styleInputField(field);
+    field.getStyle().set("min-height", "120px").set("resize", "vertical");
+    return field;
+  }
+
+  private TextField createUrlField(String label, String value, String placeholder) {
+    TextField field = new TextField(label);
+    field.setValue(value != null ? value : "");
+    field.setPlaceholder(placeholder);
+    field.setClearButtonVisible(true);
+    field.setHelperText("Optional");
+    styleInputField(field);
+    return field;
+  }
+
+  private void styleInputField(com.vaadin.flow.component.Component field) {
+    field
+        .getElement()
+        .getStyle()
+        .set("--vaadin-input-field-border-radius", "10px")
+        .set("--vaadin-input-field-background", "linear-gradient(145deg, #ffffff, #f8f9ff)")
+        .set("--vaadin-input-field-border-width", "2px")
+        .set("--vaadin-input-field-border-color", "rgba(102, 126, 234, 0.1)")
+        .set("--vaadin-input-field-hover-highlight", "#667eea")
+        .set("--vaadin-input-field-focus-ring", "0 0 0 3px rgba(102, 126, 234, 0.15)")
+        .set("font-size", "clamp(14px, 2.5vw, 16px)")
+        .set("transition", "all 0.3s ease");
+    field.getElement().getClassList().add("premium-dialog-input");
+  }
+
   private boolean validateFields() {
     if (firstNameField.getValue().isBlank() || lastNameField.getValue().isBlank()) {
       Notification notification =
           Notification.show(
               "First Name and Last Name are required", 4000, Notification.Position.TOP_CENTER);
       notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-
-      // Shake animation for error
-      getElement()
-          .executeJs(
-              "this.style.animation = 'shake 0.5s'; "
-                  + "setTimeout(() => this.style.animation = '', 500);");
-
       return false;
     }
     return true;

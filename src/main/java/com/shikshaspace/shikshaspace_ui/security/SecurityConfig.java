@@ -1,8 +1,8 @@
 package com.shikshaspace.shikshaspace_ui.security;
 
+import com.shikshaspace.shikshaspace_ui.views.LoginView;
 import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -10,48 +10,59 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-@EnableWebSecurity
+/**
+ * Production-grade security configuration for Vaadin 24.9+ Flow application. Uses
+ * VaadinSecurityConfigurer (replaces deprecated VaadinWebSecurity).
+ */
 @Configuration
-@RequiredArgsConstructor
+@EnableWebSecurity
 @Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
 public class SecurityConfig {
 
-  private final OAuth2SuccessHandler oAuth2SuccessHandler;
-
+  /**
+   * Configure security filter chain with Vaadin integration. Uses VaadinSecurityConfigurer for
+   * automatic Vaadin-related security setup.
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    // ✅ 1. Headers FIRST
-    http.headers(
-        headers ->
-            headers
-                .cacheControl(cache -> cache.disable())
-                .frameOptions(frame -> frame.sameOrigin()));
+    // Allow access to public endpoints and static resources
+    http.authorizeHttpRequests(
+        auth ->
+            auth.requestMatchers("/images/**")
+                .permitAll()
+                .requestMatchers("/styles/**")
+                .permitAll()
+                .requestMatchers("/VAADIN/**")
+                .permitAll()
+                .requestMatchers("/frontend/**")
+                .permitAll()
+                .requestMatchers("/themes/**")
+                .permitAll()
+                .requestMatchers("/sw.js")
+                .permitAll()
+                .requestMatchers("/manifest.webmanifest")
+                .permitAll()
+                .requestMatchers("/icons/**")
+                .permitAll()
+                .requestMatchers("/favicon.ico")
+                .permitAll()
+                .requestMatchers("/offline.html")
+                .permitAll()
+                .requestMatchers("/error")
+                .permitAll());
 
-    // ✅ 2. Vaadin Security BEFORE authorizeHttpRequests
+    // Configure Vaadin security with automatic CSRF and navigation control
     http.with(
         VaadinSecurityConfigurer.vaadin(),
         configurer -> {
-          configurer.loginView("/login");
+          configurer.loginView(LoginView.class);
+          // Automatically handles:
+          // - CSRF configuration for Vaadin internal requests
+          // - Navigation access control (@PermitAll, @RolesAllowed, etc.)
+          // - Static resource bypassing
+          // - Vaadin-specific exception handling
         });
-
-    //        // ✅ 3. OAuth2 login (manual trigger from button)
-    //        http.oauth2Login(oauth2 -> oauth2
-    //                .loginPage("/login")
-    //                .successHandler(oAuth2SuccessHandler)
-    //                .defaultSuccessUrl("/home", true));
-
-    http.oauth2Login(oauth2 -> oauth2.loginPage("/login").defaultSuccessUrl("/home", true));
-
-    // ✅ 4. Logout
-    http.logout(
-        logout ->
-            logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .clearAuthentication(true));
 
     return http.build();
   }

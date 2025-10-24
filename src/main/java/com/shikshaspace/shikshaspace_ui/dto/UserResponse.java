@@ -3,11 +3,13 @@ package com.shikshaspace.shikshaspace_ui.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /** User profile response DTO matching User Service API */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
