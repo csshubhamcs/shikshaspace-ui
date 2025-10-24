@@ -1,199 +1,193 @@
 package com.shikshaspace.shikshaspace_ui.components;
 
 import com.shikshaspace.shikshaspace_ui.security.SecurityUtils;
-import com.shikshaspace.shikshaspace_ui.views.HomePage;
+import com.shikshaspace.shikshaspace_ui.views.LoginView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * Production-grade responsive main layout. Provides navigation drawer and top header with user
- * profile menu.
- */
+/** Production-grade main layout with proper authentication handling. */
+@Slf4j
 public class MainLayout extends AppLayout {
 
   public MainLayout() {
     createHeader();
     createDrawer();
-    addClassName("responsive-main-layout");
   }
 
-  /** Create responsive header with logo and profile menu. */
+  /** Create header with logo and user menu. */
   private void createHeader() {
     DrawerToggle toggle = new DrawerToggle();
-    toggle.getStyle().set("color", "white").set("cursor", "pointer");
-    toggle.setAriaLabel("Toggle navigation menu");
+    toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
     H1 logo = new H1("ShikshaSpace");
     logo.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-    logo.getStyle()
-        .set("color", "white")
-        .set("font-weight", "600")
-        .set("font-size", "clamp(1.2rem, 4vw, 1.75rem)")
-        .set("letter-spacing", "0.5px");
+    logo.getStyle().set("cursor", "pointer");
+    logo.addClickListener(e -> UI.getCurrent().navigate(""));
 
-    MenuBar profileMenu = createProfileMenu();
-
-    HorizontalLayout header = new HorizontalLayout(toggle, logo, profileMenu);
-    header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-    header.expand(logo);
+    // Create header layout
+    HorizontalLayout header = new HorizontalLayout();
     header.setWidthFull();
-    header.addClassNames(LumoUtility.Padding.Vertical.SMALL, LumoUtility.Padding.Horizontal.MEDIUM);
-    header
-        .getStyle()
-        .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-        .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
+    header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+    header.setAlignItems(FlexComponent.Alignment.CENTER);
+    header.setPadding(true);
+    header.setSpacing(true);
 
+    // Left side: toggle + logo
+    HorizontalLayout leftSection = new HorizontalLayout(toggle, logo);
+    leftSection.setAlignItems(FlexComponent.Alignment.CENTER);
+    leftSection.setSpacing(true);
+
+    // Right side: user menu (only if authenticated)
+    HorizontalLayout rightSection = new HorizontalLayout();
+    rightSection.setAlignItems(FlexComponent.Alignment.CENTER);
+    rightSection.setSpacing(true);
+
+    // CRITICAL: Only show user info if authenticated
+    if (SecurityUtils.isAuthenticated()) {
+      rightSection.add(createUserMenu());
+    } else {
+      // Show login/register buttons
+      rightSection.add(createAuthButtons());
+    }
+
+    header.add(leftSection, rightSection);
     addToNavbar(header);
   }
 
-  /** Create profile dropdown menu with user info and actions. */
-  private MenuBar createProfileMenu() {
-    MenuBar menuBar = new MenuBar();
-    menuBar.setOpenOnHover(false);
-    menuBar.getStyle().set("background", "transparent").set("color", "white");
-
-    String username = SecurityUtils.getUsername();
-    String email = SecurityUtils.getEmail();
-
-    Avatar avatar = new Avatar(username != null ? username : "User");
-    avatar.getStyle().set("background", "white").set("color", "#667eea").set("cursor", "pointer");
-
-    Span usernameLabel = new Span(username != null ? username : "User");
-    usernameLabel.addClassName("username-label");
-    usernameLabel
-        .getStyle()
-        .set("color", "white")
-        .set("margin-left", "10px")
-        .set("font-weight", "500");
-
-    HorizontalLayout profileItem = new HorizontalLayout(avatar, usernameLabel);
-    profileItem.setAlignItems(FlexComponent.Alignment.CENTER);
-    profileItem.setSpacing(false);
-
-    MenuItem menuItem = menuBar.addItem(profileItem);
-    SubMenu subMenu = menuItem.getSubMenu();
-
-    // User info header
-    VerticalLayout userInfo = new VerticalLayout();
-    userInfo.setPadding(true);
-    userInfo.setSpacing(false);
-
-    Span nameSpan = new Span(username != null ? username : "User");
-    nameSpan.getStyle().set("font-weight", "600").set("font-size", "15px");
-
-    Span emailSpan = new Span(email != null ? email : "");
-    emailSpan.getStyle().set("font-size", "12px").set("color", "var(--lumo-secondary-text-color)");
-
-    userInfo.add(nameSpan, emailSpan);
-    subMenu.addItem(userInfo).setEnabled(false);
-    subMenu.add(new Hr());
-
-    // Profile link
-    MenuItem editProfile = subMenu.addItem(createMenuItemContent(VaadinIcon.USER, "Edit Profile"));
-    editProfile.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("profile")));
-
-    // Logout link
-    MenuItem logout = subMenu.addItem(createMenuItemContent(VaadinIcon.SIGN_OUT, "Logout"));
-    logout.addClickListener(
-        e -> {
-          SecurityUtils.logout();
-          getUI().ifPresent(ui -> ui.navigate("login"));
-        });
-
-    return menuBar;
-  }
-
-  /** Helper to create menu item with icon and text. */
-  private HorizontalLayout createMenuItemContent(VaadinIcon iconType, String text) {
-    Icon icon = iconType.create();
-    icon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-
-    Span label = new Span(text);
-    label.getStyle().set("margin-left", "10px");
-
-    HorizontalLayout layout = new HorizontalLayout(icon, label);
-    layout.setAlignItems(FlexComponent.Alignment.CENTER);
-    layout.setSpacing(false);
-    return layout;
-  }
-
-  /** Create navigation drawer with menu items. */
+  /** Create drawer with navigation items. */
   private void createDrawer() {
-    VerticalLayout drawerContent = new VerticalLayout();
-    drawerContent.setSizeFull();
-    drawerContent.setPadding(true);
-    drawerContent.setSpacing(true);
+    SideNav nav = new SideNav();
 
-    RouterLink homeLink = createNavLink(VaadinIcon.HOME, "Home", HomePage.class);
-    RouterLink profileLink = createNavLink(VaadinIcon.USER, "Profile", "profile");
+    // Always visible items
+    nav.addItem(new SideNavItem("Home", "", VaadinIcon.HOME.create()));
+    nav.addItem(new SideNavItem("Explore", "explore", VaadinIcon.SEARCH.create()));
+    nav.addItem(new SideNavItem("About", "about", VaadinIcon.INFO_CIRCLE.create()));
 
-    drawerContent.add(homeLink, profileLink);
-    addToDrawer(drawerContent);
+    // Only show profile if authenticated
+    if (SecurityUtils.isAuthenticated()) {
+      nav.addItem(new SideNavItem("Profile", "profile", VaadinIcon.USER.create()));
+    }
+
+    addToDrawer(nav);
   }
 
-  /** Create navigation link with icon and label. */
-  private RouterLink createNavLink(
-      VaadinIcon iconType,
-      String text,
-      Class<? extends com.vaadin.flow.component.Component> routeClass) {
-    Icon icon = iconType.create();
-    icon.getStyle().set("width", "20px").set("height", "20px");
+  /** Create user menu with avatar and dropdown (shown when authenticated). */
+  private Div createUserMenu() {
+    String username = SecurityUtils.getUsername();
 
-    Span label = new Span(text);
+    if (username == null || username.isEmpty()) {
+      log.warn("⚠️ createUserMenu called but no username found");
+      return new Div(); // Return empty div
+    }
 
-    RouterLink link = new RouterLink();
-    link.add(icon, label);
-    link.setRoute(routeClass);
-    link.addClassName("responsive-nav-link");
-    link.getStyle()
+    // User section container
+    Div userSection = new Div();
+    userSection.addClassName("user-section");
+    userSection
+        .getStyle()
         .set("display", "flex")
         .set("align-items", "center")
-        .set("gap", "12px")
-        .set("padding", "12px 16px")
-        .set("border-radius", "10px")
-        .set("text-decoration", "none")
-        .set("color", "var(--lumo-body-text-color)")
-        .set("transition", "all 0.3s ease");
+        .set("gap", "10px")
+        .set("cursor", "pointer")
+        .set("padding", "8px 12px")
+        .set("border-radius", "8px")
+        .set("background", "var(--lumo-contrast-5pct)");
 
-    return link;
+    // Avatar
+    Avatar avatar = new Avatar(username);
+    avatar.setColorIndex(username.hashCode() % 7);
+
+    // Username
+    Span usernameSpan = new Span(username);
+    usernameSpan.getStyle().set("font-weight", "500").set("color", "var(--lumo-body-text-color)");
+
+    userSection.add(avatar, usernameSpan);
+
+    // Create context menu
+    ContextMenu contextMenu = new ContextMenu();
+    contextMenu.setTarget(userSection);
+    contextMenu.setOpenOnClick(true);
+
+    // Menu items
+    contextMenu
+        .addItem(
+            "Profile",
+            e -> {
+              log.info("Navigating to profile");
+              UI.getCurrent().navigate("profile");
+            })
+        .addComponentAsFirst(VaadinIcon.USER.create());
+
+    contextMenu
+        .addItem(
+            "Settings",
+            e -> {
+              log.info("Navigating to settings");
+              UI.getCurrent().navigate("settings");
+            })
+        .addComponentAsFirst(VaadinIcon.COG.create());
+
+    contextMenu.add(new Div()); // Separator
+
+    contextMenu
+        .addItem(
+            "Logout",
+            e -> {
+              log.info("User logout initiated");
+              handleLogout();
+            })
+        .addComponentAsFirst(VaadinIcon.SIGN_OUT.create());
+
+    return userSection;
   }
 
-  /** Overloaded method for String route navigation. */
-  private RouterLink createNavLink(VaadinIcon iconType, String text, String route) {
-    Icon icon = iconType.create();
-    icon.getStyle().set("width", "20px").set("height", "20px");
+  /** Create login/register buttons (shown when NOT authenticated). */
+  private HorizontalLayout createAuthButtons() {
+    HorizontalLayout authButtons = new HorizontalLayout();
+    authButtons.setSpacing(true);
+    authButtons.setAlignItems(FlexComponent.Alignment.CENTER);
 
-    Span label = new Span(text);
+    // Login button
+    Button loginButton = new Button("Sign In", new Icon(VaadinIcon.SIGN_IN));
+    loginButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+    loginButton.addClickListener(e -> UI.getCurrent().navigate("login"));
 
-    RouterLink link = new RouterLink(text, HomePage.class);
-    link.getElement().setAttribute("href", route);
-    link.removeAll();
-    link.add(icon, label);
-    link.addClassName("responsive-nav-link");
-    link.getStyle()
-        .set("display", "flex")
-        .set("align-items", "center")
-        .set("gap", "12px")
-        .set("padding", "12px 16px")
-        .set("border-radius", "10px")
-        .set("text-decoration", "none")
-        .set("color", "var(--lumo-body-text-color)")
-        .set("transition", "all 0.3s ease");
+    // Register button
+    Button registerButton = new Button("Sign Up", new Icon(VaadinIcon.USER_CHECK));
+    registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+    registerButton.addClickListener(e -> UI.getCurrent().navigate("register"));
 
-    return link;
+    authButtons.add(loginButton, registerButton);
+    return authButtons;
+  }
+
+  /** Handle user logout. */
+  private void handleLogout() {
+    log.info("🔵 Logout initiated");
+
+    // Clear session
+    SecurityUtils.logout();
+
+    // Navigate to login
+    UI.getCurrent().navigate(LoginView.class);
+    UI.getCurrent().getPage().reload();
+
+    log.info("✅ User logged out and redirected to login");
   }
 }

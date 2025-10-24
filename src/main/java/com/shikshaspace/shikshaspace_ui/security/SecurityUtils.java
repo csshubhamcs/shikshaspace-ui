@@ -14,11 +14,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
-/** Production-grade security utility with proper session management. */
+/** FIXED Security utility - properly checks authentication. */
 @Slf4j
 public class SecurityUtils {
 
-  /** Authenticate user and store in both Spring Security and Vaadin session. */
+  /** Authenticate user and store in session. */
   public static void authenticateUser(String username, UUID userId, String token, String email) {
     log.info("🔵 Authenticating user: {}", username);
 
@@ -40,49 +40,55 @@ public class SecurityUtils {
       session.setAttribute("username", username);
       session.setAttribute("email", email);
       session.setAttribute("jwttoken", token);
+      session.setAttribute("authenticated", true); // ADD THIS FLAG
       log.info("✅ Session created for: {}", username);
     }
-
-    // Verify authentication was set
-    log.info("✅ Authentication status: {}", isAuthenticated());
   }
 
-  /** Check if user is authenticated - checks BOTH Spring Security AND session. */
+  /** Check if user is authenticated - CRITICAL FIX. */
   public static boolean isAuthenticated() {
-    // Check Spring Security context
+    // First check Vaadin session flag
+    VaadinSession session = VaadinSession.getCurrent();
+    if (session != null) {
+      Boolean authenticated = (Boolean) session.getAttribute("authenticated");
+      String username = (String) session.getAttribute("username");
+      String token = (String) session.getAttribute("jwttoken");
+
+      // User is authenticated ONLY if flag is true AND has username AND token
+      boolean sessionAuth =
+          Boolean.TRUE.equals(authenticated)
+              && username != null
+              && !username.isEmpty()
+              && token != null
+              && !token.isEmpty();
+
+      if (sessionAuth) {
+        log.debug("✅ User authenticated via session: {}", username);
+        return true;
+      }
+    }
+
+    // Fallback: Check Spring Security context
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null
         && authentication.isAuthenticated()
         && !"anonymousUser".equals(authentication.getName())) {
+      log.debug("✅ User authenticated via Security context: {}", authentication.getName());
       return true;
     }
 
-    // Fallback: Check Vaadin session
-    VaadinSession session = VaadinSession.getCurrent();
-    if (session != null) {
-      String username =
-          session.getAttribute("username") != null
-              ? (String) session.getAttribute("username")
-              : null;
-      String token =
-          session.getAttribute("jwttoken") != null
-              ? (String) session.getAttribute("jwttoken")
-              : null;
-
-      boolean sessionAuth = username != null && token != null;
-      if (sessionAuth) {
-        log.debug("✅ User authenticated via session: {}", username);
-      }
-      return sessionAuth;
-    }
-
+    log.debug("❌ User NOT authenticated");
     return false;
   }
 
-  /** Get current authenticated username. */
+  /** Get current username. */
   public static String getUsername() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    VaadinSession session = VaadinSession.getCurrent();
+    if (session != null) {
+      return (String) session.getAttribute("username");
+    }
 
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.isAuthenticated()) {
       String username = authentication.getName();
       if (!"anonymousUser".equals(username)) {
@@ -90,60 +96,42 @@ public class SecurityUtils {
       }
     }
 
-    VaadinSession session = VaadinSession.getCurrent();
-    if (session != null) {
-      return session.getAttribute("username") != null
-          ? (String) session.getAttribute("username")
-          : null;
-    }
-
     return null;
   }
 
-  /** Get current user's email from session. */
   public static String getEmail() {
     VaadinSession session = VaadinSession.getCurrent();
-    if (session != null) {
-      return session.getAttribute("email") != null ? (String) session.getAttribute("email") : null;
-    }
-    return null;
+    return session != null ? (String) session.getAttribute("email") : null;
   }
 
-  /** Get current user ID from session. */
   public static UUID getUserId() {
     VaadinSession session = VaadinSession.getCurrent();
-    if (session != null) {
-      return session.getAttribute("userId") != null ? (UUID) session.getAttribute("userId") : null;
-    }
-    return null;
+    return session != null ? (UUID) session.getAttribute("userId") : null;
   }
 
-  /** Get JWT token from session. */
   public static String getToken() {
     VaadinSession session = VaadinSession.getCurrent();
-    if (session != null) {
-      return session.getAttribute("jwttoken") != null
-          ? (String) session.getAttribute("jwttoken")
-          : null;
-    }
-    return null;
+    return session != null ? (String) session.getAttribute("jwttoken") : null;
   }
 
-  /** Logout user - clear all authentication. */
+  /** Logout user - clear everything. */
   public static void logout() {
-    log.info("🔵 Logging out user: {}", getUsername());
+    String username = getUsername();
+    log.info("🔵 Logging out user: {}", username);
 
-    SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-    logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
-
+    // Clear Vaadin session
     VaadinSession session = VaadinSession.getCurrent();
     if (session != null) {
       session.setAttribute("userId", null);
       session.setAttribute("username", null);
       session.setAttribute("email", null);
       session.setAttribute("jwttoken", null);
-      session.close();
+      session.setAttribute("authenticated", null); // CLEAR FLAG
     }
+
+    // Clear Security context
+    SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+    logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
 
     SecurityContextHolder.clearContext();
     log.info("✅ User logged out successfully");

@@ -2,9 +2,13 @@ package com.shikshaspace.shikshaspace_ui.views;
 
 import com.shikshaspace.shikshaspace_ui.components.MainLayout;
 import com.shikshaspace.shikshaspace_ui.dto.AuthResponse;
+import com.shikshaspace.shikshaspace_ui.dto.GoogleSignInRequest;
 import com.shikshaspace.shikshaspace_ui.dto.RegisterRequest;
 import com.shikshaspace.shikshaspace_ui.security.SecurityUtils;
+import com.shikshaspace.shikshaspace_ui.service.GoogleSignInService;
 import com.shikshaspace.shikshaspace_ui.service.UserServiceClient;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,7 +24,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import lombok.extern.slf4j.Slf4j;
 
-/** Production-grade registration view with validation. */
+/** Registration view with traditional form and Google Sign-In. */
 @Slf4j
 @Route(value = "register", layout = MainLayout.class)
 @PageTitle("Register - ShikshaSpace")
@@ -28,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 public class RegisterView extends VerticalLayout {
 
   private final UserServiceClient userServiceClient;
+  private final GoogleSignInService googleSignInService;
 
-  // REMOVED 'final' keyword from all fields
   private TextField usernameField;
   private EmailField emailField;
   private PasswordField passwordField;
@@ -38,9 +42,12 @@ public class RegisterView extends VerticalLayout {
   private TextField lastNameField;
   private Button registerButton;
   private Div errorMessage;
+  private Div googleButtonContainer;
 
-  public RegisterView(UserServiceClient userServiceClient) {
+  public RegisterView(
+      UserServiceClient userServiceClient, GoogleSignInService googleSignInService) {
     this.userServiceClient = userServiceClient;
+    this.googleSignInService = googleSignInService;
 
     setSizeFull();
     setAlignItems(Alignment.CENTER);
@@ -50,14 +57,31 @@ public class RegisterView extends VerticalLayout {
     add(createRegisterCard());
   }
 
+  @Override
+  protected void onAttach(AttachEvent attachEvent) {
+    super.onAttach(attachEvent);
+
+    // Initialize Google Sign-In button
+    UI.getCurrent()
+        .access(
+            () -> {
+              try {
+                googleSignInService.initializeGoogleSignIn(this::handleGoogleCallback);
+                log.info("✅ Google Sign-In button initialized on Register page");
+              } catch (Exception e) {
+                log.error("❌ Failed to initialize Google Sign-In: {}", e.getMessage());
+              }
+            });
+  }
+
   private Div createRegisterCard() {
     Div card = new Div();
     card.addClassName("register-card-responsive");
 
-    H2 title = new H2("Create Account");
+    H2 title = new H2("Join ShikshaSpace today");
     title.addClassName("gradient-text");
 
-    Paragraph subtitle = new Paragraph("Join ShikshaSpace today");
+    Paragraph subtitle = new Paragraph("Create your account");
     subtitle.addClassName("register-subtitle");
 
     usernameField = new TextField("Username");
@@ -103,6 +127,15 @@ public class RegisterView extends VerticalLayout {
     registerButton.addClassName("premium-register-button");
     registerButton.setWidthFull();
 
+    Div divider = new Div(new Span("OR"));
+    divider.addClassName("divider-container");
+
+    // Google Sign-In button container
+    googleButtonContainer = new Div();
+    googleButtonContainer.setId("google-signin-button");
+    googleButtonContainer.addClassName("google-button-container");
+    googleButtonContainer.setWidthFull();
+
     Div loginLink = createLoginLink();
 
     card.add(
@@ -116,6 +149,8 @@ public class RegisterView extends VerticalLayout {
         confirmPasswordField,
         errorMessage,
         registerButton,
+        divider,
+        googleButtonContainer, // Google button will render here
         loginLink);
 
     return card;
@@ -159,6 +194,7 @@ public class RegisterView extends VerticalLayout {
 
     registerButton.setEnabled(false);
     registerButton.setText("Creating account...");
+    hideError();
 
     RegisterRequest request =
         RegisterRequest.builder()
@@ -211,9 +247,28 @@ public class RegisterView extends VerticalLayout {
     showError(errorMsg);
   }
 
+  @ClientCallable
+  public void handleGoogleCallback(String idToken) {
+    log.info("🔵 Google callback received on Register page");
+
+    GoogleSignInRequest request = new GoogleSignInRequest(idToken);
+
+    userServiceClient
+        .googleSignIn(request)
+        .subscribe(this::handleSuccessfulRegistration, this::handleGoogleError);
+  }
+
+  private void handleGoogleError(Throwable error) {
+    log.error("❌ Google Sign-In failed: {}", error.getMessage());
+    showError("Google Sign-In failed. Please try again.");
+  }
+
   private void showError(String message) {
     errorMessage.setText(message);
     errorMessage.setVisible(true);
-    errorMessage.getStyle().set("animation", "shake 0.5s ease-in-out");
+  }
+
+  private void hideError() {
+    errorMessage.setVisible(false);
   }
 }

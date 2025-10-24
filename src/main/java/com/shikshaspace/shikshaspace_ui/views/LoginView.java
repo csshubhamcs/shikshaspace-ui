@@ -7,6 +7,8 @@ import com.shikshaspace.shikshaspace_ui.dto.LoginRequest;
 import com.shikshaspace.shikshaspace_ui.security.SecurityUtils;
 import com.shikshaspace.shikshaspace_ui.service.GoogleSignInService;
 import com.shikshaspace.shikshaspace_ui.service.UserServiceClient;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -21,7 +23,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import lombok.extern.slf4j.Slf4j;
 
-/** Production-grade login view with traditional and Google Sign-In. */
 @Slf4j
 @Route(value = "login", layout = MainLayout.class)
 @PageTitle("Login - ShikshaSpace")
@@ -49,15 +50,29 @@ public class LoginView extends VerticalLayout {
     add(createLoginCard());
   }
 
+  @Override
+  protected void onAttach(AttachEvent attachEvent) {
+    super.onAttach(attachEvent);
+
+    // Initialize Google Sign-In AFTER component is attached to DOM
+    UI.getCurrent()
+        .access(
+            () -> {
+              try {
+                googleSignInService.initializeGoogleSignIn(this::handleGoogleCallback);
+                log.info("✅ Google Sign-In button initialized");
+              } catch (Exception e) {
+                log.error("❌ Failed to initialize Google Sign-In: {}", e.getMessage());
+              }
+            });
+  }
+
   private Div createLoginCard() {
     Div card = new Div();
     card.addClassName("login-card-responsive");
 
-    H2 title = new H2("Welcome Back");
+    H2 title = new H2("Sign in to your account");
     title.addClassName("gradient-text");
-
-    Paragraph subtitle = new Paragraph("Sign in to your account");
-    subtitle.addClassName("login-subtitle");
 
     usernameField = new TextField("Username");
     usernameField.setPlaceholder("Enter your username");
@@ -81,24 +96,23 @@ public class LoginView extends VerticalLayout {
     Div divider = new Div(new Span("OR"));
     divider.addClassName("divider-container");
 
+    // Google button container
     googleButtonContainer = new Div();
     googleButtonContainer.setId("google-signin-button");
     googleButtonContainer.addClassName("google-button-container");
+    googleButtonContainer.setWidthFull();
 
     Div registerLink = createRegisterLink();
 
     card.add(
         title,
-        subtitle,
         usernameField,
         passwordField,
         errorMessage,
         loginButton,
         divider,
-        googleButtonContainer,
+        googleButtonContainer, // This is where Google button will render
         registerLink);
-
-    googleSignInService.initializeGoogleSignIn(this::handleGoogleCallback);
 
     return card;
   }
@@ -126,6 +140,7 @@ public class LoginView extends VerticalLayout {
 
     loginButton.setEnabled(false);
     loginButton.setText("Signing in...");
+    hideError();
 
     LoginRequest request = new LoginRequest(username, password);
 
@@ -135,22 +150,21 @@ public class LoginView extends VerticalLayout {
   private void handleSuccessfulLogin(AuthResponse response) {
     log.info("✅ Login successful for user: {}", response.getUsername());
 
-    // CRITICAL: Properly authenticate user
+    // Authenticate user
     SecurityUtils.authenticateUser(
         response.getUsername(), response.getUserId(), response.getToken(), response.getEmail());
 
-    // Verify authentication was set
-    log.info("✅ Authentication status after login: {}", SecurityUtils.isAuthenticated());
-    log.info("✅ Session username: {}", SecurityUtils.getUsername());
+    // Verify authentication
+    log.info("✅ Authentication status: {}", SecurityUtils.isAuthenticated());
 
-    // Show success notification
+    // Show notification
     Notification.show(
             "Welcome, " + response.getUsername() + "!", 3000, Notification.Position.TOP_CENTER)
         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-    // Navigate to home page
+    // Navigate to home
     UI.getCurrent().navigate("");
-    UI.getCurrent().getPage().reload(); // Force reload to refresh security context
+    UI.getCurrent().getPage().reload();
   }
 
   private void handleLoginError(Throwable error) {
@@ -159,20 +173,14 @@ public class LoginView extends VerticalLayout {
     loginButton.setEnabled(true);
     loginButton.setText("Sign In");
 
-    String errorMsg = "Invalid username or password";
-    if (error.getMessage().contains("timeout")) {
-      errorMsg = "Connection timeout. Please try again.";
-    } else if (error.getMessage().contains("401")) {
-      errorMsg = "Invalid credentials. Please check your username and password.";
-    }
-
-    showError(errorMsg);
+    showError("Invalid username or password");
     passwordField.clear();
     passwordField.focus();
   }
 
+  @ClientCallable
   public void handleGoogleCallback(String idToken) {
-    log.info("🔵 Google callback received");
+    log.info("🔵 Google callback received with token");
 
     GoogleSignInRequest request = new GoogleSignInRequest(idToken);
 
@@ -189,6 +197,9 @@ public class LoginView extends VerticalLayout {
   private void showError(String message) {
     errorMessage.setText(message);
     errorMessage.setVisible(true);
-    errorMessage.getStyle().set("animation", "shake 0.5s ease-in-out");
+  }
+
+  private void hideError() {
+    errorMessage.setVisible(false);
   }
 }
