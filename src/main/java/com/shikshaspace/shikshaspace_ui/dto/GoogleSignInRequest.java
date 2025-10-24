@@ -1,13 +1,23 @@
 package com.shikshaspace.shikshaspace_ui.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Request DTO for Google Sign-In. */
+/**
+ * DTO for sending Google ID token to backend.
+ */
 @Data
+@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class GoogleSignInRequest {
-  private String googleIdToken;
+
+    /**
+     * Google ID token from JavaScript SDK.
+     */
+    private String idToken;
+
+    public GoogleSignInRequest(String idToken) {
+        this.idToken = idToken;
+    }
 }
