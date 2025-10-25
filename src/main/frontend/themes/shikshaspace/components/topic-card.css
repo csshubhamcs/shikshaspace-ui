@@ -1,0 +1,62 @@
+/* ========================================
+   Topic Card Component
+   ======================================== */
+
+.topic-card {
+  background-color: var(--color-background-surface);
+  border: 2px solid var(--color-brand-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  transition: all var(--transition-slow);
+  position: relative;
+  min-height: 220px;
+  cursor: pointer;
+}
+
+.topic-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: #5568d3;
+}
+
+.topic-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.topic-card__subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.topic-card__author {
+  font-size: 0.8125rem;
+  color: var(--color-brand-primary);
+  font-weight: 500;
+  margin: var(--spacing-2) 0 var(--spacing-1) 0;
+}
+
+.topic-card__time {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.topic-card__button {
+  margin-top: auto;
+  width: fit-content;
+  align-self: flex-start;
+  transition: transform var(--transition-base);
+}
+
+.topic-card:hover .topic-card__button {
+  transform: scale(1.05);
+}

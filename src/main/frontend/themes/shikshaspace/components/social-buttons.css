@@ -1,0 +1,52 @@
+/* ========================================
+   Social Login Buttons
+   ======================================== */
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
+
+.social-button {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-default);
+  background-color: var(--color-background-surface);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+}
+
+.social-button:hover {
+  background-color: var(--color-background-hover);
+  border-color: #cccccc;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.social-button--google {
+  border-color: var(--color-social-google);
+  color: var(--color-social-google);
+}
+
+.social-button--google:hover {
+  background-color: rgba(66, 133, 244, 0.05);
+}
+
+.social-button--github {
+  border-color: var(--color-social-github);
+  color: var(--color-social-github);
+}
+
+.social-button--github:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

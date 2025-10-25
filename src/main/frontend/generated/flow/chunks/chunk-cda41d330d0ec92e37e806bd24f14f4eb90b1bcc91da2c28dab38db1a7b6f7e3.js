@@ -1,0 +1,11 @@
+import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
+import '@vaadin/form-layout/theme/lumo/vaadin-form-layout.js';
+import '@vaadin/form-layout/theme/lumo/vaadin-form-item.js';
+import '@vaadin/form-layout/theme/lumo/vaadin-form-row.js';
+import '@vaadin/button/theme/lumo/vaadin-button.js';
+import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
+import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
+import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
+import '@vaadin/email-field/theme/lumo/vaadin-email-field.js';
+import '@vaadin/password-field/theme/lumo/vaadin-password-field.js';

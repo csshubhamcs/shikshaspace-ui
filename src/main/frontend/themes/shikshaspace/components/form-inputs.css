@@ -1,0 +1,55 @@
+/* ========================================
+   Form Inputs - Vaadin Components
+   ======================================== */
+
+vaadin-text-field,
+vaadin-email-field,
+vaadin-password-field {
+  width: 100%;
+}
+
+vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
+vaadin-password-field::part(input-field) {
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-default);
+  background-color: var(--color-background-surface);
+  min-height: 48px;
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+}
+
+vaadin-text-field::part(input-field):focus,
+vaadin-email-field::part(input-field):focus,
+vaadin-password-field::part(input-field):focus {
+  border-color: var(--color-social-google);
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+vaadin-form-layout {
+  margin: var(--spacing-4) 0;
+}
+
+vaadin-button[theme~="primary"] {
+  width: 100%;
+  min-height: 48px;
+  background: var(--color-brand-gradient);
+  border: none;
+  border-radius: var(--radius-base);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+vaadin-button[theme~="primary"]:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+vaadin-button[theme~="primary"]:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}

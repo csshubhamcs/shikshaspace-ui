@@ -1,0 +1,57 @@
+/* ========================================
+   Design Tokens - CSS Variables
+   ======================================== */
+
+:root {
+  /* Brand Colors */
+  --color-brand-primary: #667eea;
+  --color-brand-secondary: #764ba2;
+  --color-brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  /* Semantic Colors */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-background-page: #f5f5f5;
+  --color-background-surface: #ffffff;
+  --color-background-hover: #f8f8f8;
+  --color-border-default: #e0e0e0;
+  --color-border-light: #f0f0f0;
+
+  /* Social Colors */
+  --color-social-google: #4285f4;
+  --color-social-github: #333333;
+
+  /* Spacing (8px base) */
+  --spacing-1: 0.25rem;  /* 4px */
+  --spacing-2: 0.5rem;   /* 8px */
+  --spacing-3: 0.75rem;  /* 12px */
+  --spacing-4: 1rem;     /* 16px */
+  --spacing-5: 1.25rem;  /* 20px */
+  --spacing-6: 1.5rem;   /* 24px */
+  --spacing-8: 2rem;     /* 32px */
+  --spacing-10: 2.5rem;  /* 40px */
+  --spacing-15: 3.75rem; /* 60px */
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;  /* 6px */
+  --radius-base: 0.5rem;  /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(102, 126, 234, 0.3);
+  --shadow-xl: 0 12px 32px rgba(102, 126, 234, 0.25);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Layout */
+  --layout-navbar-height: 60px;
+  --layout-content-max-width: 1400px;
+  --layout-card-max-width: 450px;
+}
