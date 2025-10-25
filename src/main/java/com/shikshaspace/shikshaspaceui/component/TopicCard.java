@@ -1,98 +1,70 @@
 package com.shikshaspace.shikshaspaceui.component;
 
+import com.shikshaspace.shikshaspaceui.dto.SpaceResponse;
+import com.shikshaspace.shikshaspaceui.security.SecurityUtils;
+import com.shikshaspace.shikshaspaceui.service.SpaceService;
+import com.shikshaspace.shikshaspaceui.views.auth.LoginView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 
 public class TopicCard extends Div {
 
-  public TopicCard(String title, String subtitle, String author, String time) {
+  private final SecurityUtils securityUtils;
+  private final SpaceService spaceService;
+  private final SpaceResponse space;
+
+  public TopicCard(SpaceResponse space, SecurityUtils securityUtils, SpaceService spaceService) {
+    this.space = space;
+    this.securityUtils = securityUtils;
+    this.spaceService = spaceService;
+
     addClassName("topic-card");
 
-    // Force card styling
-    getStyle()
-        .set("background", "white")
-        .set("border", "2px solid #667eea")
-        .set("border-radius", "16px")
-        .set("padding", "24px")
-        .set("display", "flex")
-        .set("flex-direction", "column")
-        .set("gap", "12px")
-        .set("min-height", "220px")
-        .set("transition", "all 0.3s ease")
-        .set("cursor", "pointer");
+    Span titleSpan = new Span(space.getTitle());
+    titleSpan.addClassName("topic-card__title");
 
-    // Title
-    Span titleSpan = new Span(title);
-    titleSpan.addClassName("topic-title");
-    titleSpan
-        .getStyle()
-        .set("font-size", "20px")
-        .set("font-weight", "600")
-        .set("color", "#1a1a1a")
-        .set("display", "block")
-        .set("margin-bottom", "8px");
+    Span subtitleSpan = new Span(space.getSubtitle() != null ? space.getSubtitle() : "");
+    subtitleSpan.addClassName("topic-card__subtitle");
 
-    // Subtitle
-    Span subtitleSpan = new Span(subtitle);
-    subtitleSpan.addClassName("topic-subtitle");
-    subtitleSpan
-        .getStyle()
-        .set("font-size", "14px")
-        .set("color", "#666")
-        .set("line-height", "1.5")
-        .set("display", "block")
-        .set("margin-bottom", "12px")
-        .set("flex", "1"); // Push button to bottom
+    Span authorSpan = new Span(space.getHostUsername() != null ? space.getHostUsername() : "");
+    authorSpan.addClassName("topic-card__author");
 
-    // Author
-    Span authorSpan = new Span(author);
-    authorSpan.addClassName("topic-author");
-    authorSpan
-        .getStyle()
-        .set("font-size", "13px")
-        .set("color", "#667eea")
-        .set("font-weight", "500")
-        .set("display", "block")
-        .set("margin-bottom", "4px");
+    Span timeSpan = new Span("Today 8:00 PM");
+    timeSpan.addClassName("topic-card__time");
 
-    // Time
-    Span timeSpan = new Span(time);
-    timeSpan.addClassName("topic-time");
-    timeSpan
-        .getStyle()
-        .set("font-size", "13px")
-        .set("color", "#999")
-        .set("display", "block")
-        .set("margin-bottom", "12px");
-
-    // Join button
-    Button joinButton = new Button("join");
+    Button joinButton = new Button("Join");
     joinButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-    joinButton.addClassName("topic-join-btn");
-    joinButton.addClickListener(
-        e -> {
-          joinButton.setText("Joined!");
-        });
+    joinButton.addClassName("topic-card__button");
+    joinButton.addClickListener(e -> handleJoin());
 
     add(titleSpan, subtitleSpan, authorSpan, timeSpan, joinButton);
+  }
 
-    // Hover effect
-    getElement()
-        .addEventListener(
-            "mouseenter",
-            e -> {
-              getStyle()
-                  .set("transform", "translateY(-6px)")
-                  .set("box-shadow", "0 12px 32px rgba(102, 126, 234, 0.25)");
-            });
+  private void handleJoin() {
+    if (!securityUtils.isUserLoggedIn()) {
+      Notification notification = Notification.show("Please login to join this space");
+      notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+      notification.setPosition(Notification.Position.TOP_CENTER);
 
-    getElement()
-        .addEventListener(
-            "mouseleave",
-            e -> {
-              getStyle().set("transform", "translateY(0)").set("box-shadow", "none");
-            });
+      getUI().ifPresent(ui -> ui.navigate(LoginView.class));
+      return;
+    }
+
+    if (space.getId() != null) {
+      try {
+        spaceService.joinSpace(space.getId());
+        Notification notification = Notification.show("Successfully joined!");
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+      } catch (Exception e) {
+        Notification notification = Notification.show("Failed to join: " + e.getMessage());
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 # Multi-stage build - Build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN chmod +x gradlew && \
     ./gradlew build -Pvaadin.productionMode -x test --no-daemon
 
 # Runtime stage - Optimized for production
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 # Install curl for health checks
 RUN apk add --no-cache curl

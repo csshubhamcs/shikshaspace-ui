@@ -12,6 +12,8 @@ import '@vaadin/button/theme/lumo/vaadin-button.js';
 import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
 import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
 import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
+import '@vaadin/notification/theme/lumo/vaadin-notification.js';
+import 'Frontend/generated/jar-resources/flow-component-renderer.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';

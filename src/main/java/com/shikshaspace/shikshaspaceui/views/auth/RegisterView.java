@@ -1,5 +1,6 @@
 package com.shikshaspace.shikshaspaceui.views.auth;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -11,10 +12,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route("register")
+@PageTitle("Register - ShikshaSpace")
+@AnonymousAllowed
 public class RegisterView extends Div {
 
   public RegisterView() {
@@ -25,29 +30,21 @@ public class RegisterView extends Div {
     card.setPadding(false);
     card.setSpacing(false);
 
-    // Title
     H1 title = new H1("Create Account");
-    //        title.setClassName("auth-card h1");
 
-    // Subtitle
     Paragraph subtitle = new Paragraph("Join ShikshaSpace today");
-    subtitle.addClassName("subtitle");
+    subtitle.addClassName("auth__subtitle");
 
-    // Social buttons
     Div socialButtons = createSocialButtons();
 
-    // Divider
     Span divider = new Span("OR");
-    divider.addClassName("divider-text");
+    divider.addClassName("auth__divider");
 
-    // Form
     FormLayout form = createForm();
 
-    // Submit button
     Button registerButton = new Button("Create Account");
     registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-    // Footer
     Div footer = createFooter();
 
     card.add(title, subtitle, socialButtons, divider, form, registerButton, footer);
@@ -60,13 +57,11 @@ public class RegisterView extends Div {
 
     Button google = new Button("Continue with Google");
     google.addClassName("social-button");
-    google.addClassName("google");
+    google.addClassName("social-button--google");
+    google.addClickListener(
+        e -> UI.getCurrent().getPage().setLocation("/oauth2/authorization/google"));
 
-    Button github = new Button("Continue with GitHub");
-    github.addClassName("social-button");
-    github.addClassName("github");
-
-    container.add(google, github);
+    container.add(google);
     return container;
   }
 
@@ -93,7 +88,7 @@ public class RegisterView extends Div {
 
   private Div createFooter() {
     Div footer = new Div();
-    footer.addClassName("auth-footer");
+    footer.addClassName("auth__footer");
 
     Span text = new Span("Already have an account?");
     RouterLink link = new RouterLink("Login", LoginView.class);

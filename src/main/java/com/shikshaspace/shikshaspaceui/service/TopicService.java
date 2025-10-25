@@ -1,4 +1,4 @@
-package com.shikshaspace.shikshaspaceui.services;
+package com.shikshaspace.shikshaspaceui.service;
 
 import com.shikshaspace.shikshaspaceui.models.Topic;
 import java.util.ArrayList;
